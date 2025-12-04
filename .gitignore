@@ -1,0 +1,10 @@
+/vendor/
+/.idea/
+*.DS_Store
+/var/
+/generated/
+/pub/static/
+/.magento.env.yaml
+/app/etc/env.php
+/app/etc/config.php
+*.log

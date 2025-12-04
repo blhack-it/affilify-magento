@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Affilify Tracking Module - Message Queue Communication Configuration
+ *
+ * @copyright Copyright (c) 2024 Affilify
+ * @license   MIT License
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Communication/etc/communication.xsd">
+    <topic name="affilify.tracking.click" request="Affilify\Tracking\Api\Data\ClickMessageInterface"/>
+    <topic name="affilify.tracking.conversion" request="Affilify\Tracking\Api\Data\ConversionMessageInterface"/>
+</config>

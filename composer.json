@@ -1,0 +1,47 @@
+{
+    "name": "affilify/magento-tracking",
+    "description": "Magento 2 affiliate conversion tracking module for Affilify platform",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Affilify",
+            "email": "dev@affilify.it"
+        }
+    ],
+    "require": {
+        "php": "^8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Affilify\\Tracking\\": "app/code/Affilify/Tracking/"
+        },
+        "files": [
+            "app/code/Affilify/Tracking/registration.php"
+        ]
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://repo.magento.com/"
+        }
+    ],
+    "config": {
+        "allow-plugins": {
+            "magento/composer-dependency-version-audit-plugin": true,
+            "magento/magento-composer-installer": true
+        }
+    },
+    "keywords": [
+        "magento2",
+        "affiliate",
+        "tracking",
+        "conversion",
+        "affilify"
+    ],
+    "homepage": "https://github.com/blhack-it/affilify-magento",
+    "support": {
+        "issues": "https://github.com/blhack-it/affilify-magento/issues",
+        "source": "https://github.com/blhack-it/affilify-magento"
+    }
+}

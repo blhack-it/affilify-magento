@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Affilify Tracking Module - Message Queue Consumer Configuration
+ *
+ * @copyright Copyright (c) 2024 Affilify
+ * @license   MIT License
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/consumer.xsd">
+    <consumer name="affilify.tracking.click.consumer"
+              queue="affilify.tracking.click"
+              handler="Affilify\Tracking\Model\Queue\ClickConsumer::process"
+              consumerInstance="Magento\Framework\MessageQueue\Consumer"
+              connection="db"
+              maxRetries="3"/>
+    <consumer name="affilify.tracking.conversion.consumer"
+              queue="affilify.tracking.conversion"
+              handler="Affilify\Tracking\Model\Queue\ConversionConsumer::process"
+              consumerInstance="Magento\Framework\MessageQueue\Consumer"
+              connection="db"
+              maxRetries="3"/>
+</config>

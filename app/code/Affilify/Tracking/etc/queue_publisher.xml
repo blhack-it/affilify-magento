@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Affilify Tracking Module - Message Queue Publisher Configuration
+ *
+ * @copyright Copyright (c) 2024 Affilify
+ * @license   MIT License
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/publisher.xsd">
+    <publisher topic="affilify.tracking.click">
+        <connection name="db" exchange="affilify.tracking" disabled="false"/>
+    </publisher>
+    <publisher topic="affilify.tracking.conversion">
+        <connection name="db" exchange="affilify.tracking" disabled="false"/>
+    </publisher>
+</config>

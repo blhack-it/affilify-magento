@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Affilify Tracking Module - Message Queue Topology Configuration
+ *
+ * @copyright Copyright (c) 2024 Affilify
+ * @license   MIT License
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
+    <exchange name="affilify.tracking" type="topic" connection="db">
+        <binding id="affilifyTrackingClickBinding" topic="affilify.tracking.click" destinationType="queue" destination="affilify.tracking.click"/>
+        <binding id="affilifyTrackingConversionBinding" topic="affilify.tracking.conversion" destinationType="queue" destination="affilify.tracking.conversion"/>
+    </exchange>
+</config>

@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Affilify Tracking Module - Dependency Injection Configuration
+ *
+ * @copyright Copyright (c) 2024 Affilify
+ * @license   MIT License
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Logger Configuration -->
+    <virtualType name="AffilfyTrackingLoggerHandler" type="Affilify\Tracking\Logger\Handler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="AffilfyTrackingLogger" type="Affilify\Tracking\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">affilify_tracking</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">AffilfyTrackingLoggerHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Inject Logger into Consumers -->
+    <type name="Affilify\Tracking\Model\Queue\ClickConsumer">
+        <arguments>
+            <argument name="logger" xsi:type="object">AffilfyTrackingLogger</argument>
+        </arguments>
+    </type>
+    <type name="Affilify\Tracking\Model\Queue\ConversionConsumer">
+        <arguments>
+            <argument name="logger" xsi:type="object">AffilfyTrackingLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Interface Preferences -->
+    <preference for="Affilify\Tracking\Api\Data\ClickMessageInterface" type="Affilify\Tracking\Model\ClickMessage"/>
+    <preference for="Affilify\Tracking\Api\Data\ConversionMessageInterface" type="Affilify\Tracking\Model\ConversionMessage"/>
+</config>

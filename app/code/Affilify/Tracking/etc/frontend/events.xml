@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Affilify Tracking Module - Frontend Events Configuration
+ *
+ * @copyright Copyright (c) 2024 Affilify
+ * @license   MIT License
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <!-- Capture URL parameter on any frontend page load -->
+    <event name="controller_action_predispatch">
+        <observer name="affilify_tracking_capture_click"
+                  instance="Affilify\Tracking\Observer\CaptureClickObserver"/>
+    </event>
+
+    <!-- Track conversion on successful checkout -->
+    <event name="checkout_onepage_controller_success_action">
+        <observer name="affilify_tracking_track_conversion"
+                  instance="Affilify\Tracking\Observer\TrackConversionObserver"/>
+    </event>
+</config>

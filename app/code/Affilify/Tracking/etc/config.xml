@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Affilify Tracking Module - Default Configuration Values
+ *
+ * @copyright Copyright (c) 2024 Affilify
+ * @license   MIT License
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <affilify_tracking>
+            <general>
+                <enabled>1</enabled>
+                <tracking_domain></tracking_domain>
+                <parameter_name>affilify_id</parameter_name>
+                <cookie_duration>30</cookie_duration>
+            </general>
+        </affilify_tracking>
+    </default>
+</config>
