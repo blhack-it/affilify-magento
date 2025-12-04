@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  web:
+    image: markshust/magento-nginx:1.24-0
+    ports:
+      - "80:8000"
+      - "443:8443"
+    volumes:
+      - ./src:/var/www/html:delegated
+    depends_on:
+      - php
+    networks:
+      - magento
+
+  php:
+    image: markshust/magento-php:8.2-fpm-2
+    volumes:
+      - ./src:/var/www/html:delegated
+      - ./app/code/Affilify:/var/www/html/app/code/Affilify:delegated
+    environment:
+      PHP_MEMORY_LIMIT: 4G
+      PHP_MAX_EXECUTION_TIME: 1800
+      PHP_UPLOAD_MAX_FILESIZE: 64M
+      PHP_POST_MAX_SIZE: 64M
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+      - rabbitmq
+    networks:
+      - magento
+
+  db:
+    image: mariadb:10.6
+    environment:
+      MYSQL_ROOT_PASSWORD: magento
+      MYSQL_DATABASE: magento
+      MYSQL_USER: magento
+      MYSQL_PASSWORD: magento
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - magento
+
+  redis:
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - magento
+
+  elasticsearch:
+    image: markshust/magento-elasticsearch:8.11-0
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "xpack.security.enabled=false"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - magento
+
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: magento
+      RABBITMQ_DEFAULT_PASS: magento
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - magento
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - magento
+
+volumes:
+  db-data:
+  elasticsearch-data:
+  rabbitmq-data:
+
+networks:
+  magento:
+    driver: bridge

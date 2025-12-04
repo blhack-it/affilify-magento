@@ -1,5 +1,6 @@
 /vendor/
 /.idea/
+/.vscode/
 *.DS_Store
 /var/
 /generated/
@@ -8,3 +9,15 @@
 /app/etc/env.php
 /app/etc/config.php
 *.log
+
+# Docker - Magento source files (downloaded during setup)
+/src/*
+!/src/.gitkeep
+
+# Composer auth (contains credentials)
+/auth.json
+
+# OS
+Thumbs.db
+*.swp
+*.swo

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Esegue comandi bin/magento nel container PHP
+docker-compose exec php bin/magento "$@"
