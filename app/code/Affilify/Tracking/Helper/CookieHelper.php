@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Affilify\Tracking\Helper;
 
+use Affilify\Tracking\Logger\Logger;
 use Magento\Framework\Stdlib\Cookie\CookieMetadataFactory;
 use Magento\Framework\Stdlib\CookieManagerInterface;
 use Magento\Framework\Session\SessionManagerInterface;
@@ -39,23 +40,31 @@ class CookieHelper
     private Config $config;
 
     /**
+     * @var Logger
+     */
+    private Logger $logger;
+
+    /**
      * CookieHelper constructor.
      *
      * @param CookieManagerInterface $cookieManager
      * @param CookieMetadataFactory $cookieMetadataFactory
      * @param SessionManagerInterface $sessionManager
      * @param Config $config
+     * @param Logger $logger
      */
     public function __construct(
         CookieManagerInterface $cookieManager,
         CookieMetadataFactory $cookieMetadataFactory,
         SessionManagerInterface $sessionManager,
-        Config $config
+        Config $config,
+        Logger $logger
     ) {
         $this->cookieManager = $cookieManager;
         $this->cookieMetadataFactory = $cookieMetadataFactory;
         $this->sessionManager = $sessionManager;
         $this->config = $config;
+        $this->logger = $logger;
     }
 
     /**
@@ -66,20 +75,31 @@ class CookieHelper
      */
     public function setTrackingCookie(string $value): void
     {
-        $metadata = $this->cookieMetadataFactory
-            ->createPublicCookieMetadata()
-            ->setDuration($this->config->getCookieDurationSeconds())
-            ->setPath($this->sessionManager->getCookiePath())
-            ->setDomain($this->sessionManager->getCookieDomain())
-            ->setHttpOnly(false)
-            ->setSecure(true)
-            ->setSameSite('Lax');
+        $this->logger->info('CookieHelper: setTrackingCookie called with value: ' . $value);
+        
+        try {
+            $duration = $this->config->getCookieDurationSeconds();
+            $this->logger->info('CookieHelper: cookie duration = ' . $duration);
+            
+            $metadata = $this->cookieMetadataFactory
+                ->createPublicCookieMetadata()
+                ->setDuration($duration)
+                ->setPath('/')
+                ->setHttpOnly(false)
+                ->setSameSite('Lax');
 
-        $this->cookieManager->setPublicCookie(
-            self::COOKIE_NAME,
-            $value,
-            $metadata
-        );
+            $this->logger->info('CookieHelper: setting cookie ' . self::COOKIE_NAME);
+            
+            $this->cookieManager->setPublicCookie(
+                self::COOKIE_NAME,
+                $value,
+                $metadata
+            );
+            
+            $this->logger->info('CookieHelper: cookie set successfully');
+        } catch (\Exception $e) {
+            $this->logger->error('CookieHelper: error setting cookie - ' . $e->getMessage());
+        }
     }
 
     /**

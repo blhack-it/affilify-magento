@@ -36,6 +36,35 @@
         </arguments>
     </type>
 
+    <!-- Inject Logger into Observers -->
+    <type name="Affilify\Tracking\Observer\CaptureClickObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">AffilfyTrackingLogger</argument>
+        </arguments>
+    </type>
+    <type name="Affilify\Tracking\Observer\TrackConversionObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">AffilfyTrackingLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Inject Logger into CookieHelper -->
+    <type name="Affilify\Tracking\Helper\CookieHelper">
+        <arguments>
+            <argument name="logger" xsi:type="object">AffilfyTrackingLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Plugin for capturing click and setting cookie BEFORE response is sent -->
+    <type name="Magento\Framework\App\ResponseInterface">
+        <plugin name="affilify_tracking_capture_click" type="Affilify\Tracking\Plugin\CaptureClickPlugin" sortOrder="1"/>
+    </type>
+    <type name="Affilify\Tracking\Plugin\CaptureClickPlugin">
+        <arguments>
+            <argument name="logger" xsi:type="object">AffilfyTrackingLogger</argument>
+        </arguments>
+    </type>
+
     <!-- Interface Preferences -->
     <preference for="Affilify\Tracking\Api\Data\ClickMessageInterface" type="Affilify\Tracking\Model\ClickMessage"/>
     <preference for="Affilify\Tracking\Api\Data\ConversionMessageInterface" type="Affilify\Tracking\Model\ConversionMessage"/>

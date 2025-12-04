@@ -9,11 +9,7 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-    <!-- Capture URL parameter on any frontend page load -->
-    <event name="controller_action_predispatch">
-        <observer name="affilify_tracking_capture_click"
-                  instance="Affilify\Tracking\Observer\CaptureClickObserver"/>
-    </event>
+    <!-- Click capture is now handled by CaptureClickPlugin for proper cookie timing -->
 
     <!-- Track conversion on successful checkout -->
     <event name="checkout_onepage_controller_success_action">

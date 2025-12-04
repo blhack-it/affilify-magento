@@ -14,6 +14,7 @@ use Affilify\Tracking\Api\Data\ClickMessageInterface;
 use Affilify\Tracking\Api\Data\ClickMessageInterfaceFactory;
 use Affilify\Tracking\Helper\Config;
 use Affilify\Tracking\Helper\CookieHelper;
+use Affilify\Tracking\Logger\Logger;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
@@ -59,6 +60,11 @@ class CaptureClickObserver implements ObserverInterface
     private RemoteAddress $remoteAddress;
 
     /**
+     * @var Logger
+     */
+    private Logger $logger;
+
+    /**
      * CaptureClickObserver constructor.
      *
      * @param RequestInterface $request
@@ -68,6 +74,7 @@ class CaptureClickObserver implements ObserverInterface
      * @param ClickMessageInterfaceFactory $clickMessageFactory
      * @param Header $httpHeader
      * @param RemoteAddress $remoteAddress
+     * @param Logger $logger
      */
     public function __construct(
         RequestInterface $request,
@@ -76,7 +83,8 @@ class CaptureClickObserver implements ObserverInterface
         PublisherInterface $publisher,
         ClickMessageInterfaceFactory $clickMessageFactory,
         Header $httpHeader,
-        RemoteAddress $remoteAddress
+        RemoteAddress $remoteAddress,
+        Logger $logger
     ) {
         $this->request = $request;
         $this->config = $config;
@@ -85,6 +93,7 @@ class CaptureClickObserver implements ObserverInterface
         $this->clickMessageFactory = $clickMessageFactory;
         $this->httpHeader = $httpHeader;
         $this->remoteAddress = $remoteAddress;
+        $this->logger = $logger;
     }
 
     /**
@@ -95,19 +104,25 @@ class CaptureClickObserver implements ObserverInterface
      */
     public function execute(Observer $observer): void
     {
+        $this->logger->info('CaptureClickObserver: execute() called');
+        
         // Check if tracking is enabled
         if (!$this->config->isEnabled()) {
+            $this->logger->info('CaptureClickObserver: tracking is disabled');
             return;
         }
 
         // Get the configured parameter name
         $parameterName = $this->config->getParameterName();
         if (empty($parameterName)) {
+            $this->logger->info('CaptureClickObserver: parameter name is empty');
             return;
         }
 
         // Check if the tracking parameter is present in the URL
         $affilfyId = $this->request->getParam($parameterName);
+        $this->logger->info('CaptureClickObserver: looking for param "' . $parameterName . '", found: "' . ($affilfyId ?: 'null') . '"');
+        
         if (empty($affilfyId)) {
             return;
         }
@@ -115,8 +130,11 @@ class CaptureClickObserver implements ObserverInterface
         // Get tracking domain
         $trackingDomain = $this->config->getTrackingDomain();
         if (empty($trackingDomain)) {
+            $this->logger->info('CaptureClickObserver: tracking domain is empty');
             return;
         }
+
+        $this->logger->info('CaptureClickObserver: capturing click for affilify_id=' . $affilfyId);
 
         // Set/overwrite the tracking cookie (last-touch attribution)
         $this->cookieHelper->setTrackingCookie($affilfyId);
@@ -132,5 +150,6 @@ class CaptureClickObserver implements ObserverInterface
             ->setTrackingDomain($trackingDomain);
 
         $this->publisher->publish('affilify.tracking.click', $clickMessage);
+        $this->logger->info('CaptureClickObserver: click message published to queue');
     }
 }
