@@ -55,35 +55,45 @@ sleep 10
 
 # Verifica che il database sia pronto
 echo "🔍 Verifico connessione al database..."
-until docker-compose exec -T db mysqladmin ping -h localhost -u magento -pmagento --silent; do
-    echo "   Attendo il database..."
-    sleep 5
+for i in {1..30}; do
+    if docker-compose exec -T db mysqladmin ping -h localhost -u magento -pmagento --silent 2>/dev/null; then
+        echo -e "${GREEN}✅ Database pronto${NC}"
+        break
+    fi
+    echo "   Attendo il database... ($i/30)"
+    sleep 2
 done
-echo -e "${GREEN}✅ Database pronto${NC}"
 
 # Verifica che Elasticsearch sia pronto
-echo "🔍 Verifico Elasticsearch..."
+echo "🔍 Verifico OpenSearch..."
 until curl -s http://localhost:9200/_cluster/health > /dev/null 2>&1; do
-    echo "   Attendo Elasticsearch..."
+    echo "   Attendo OpenSearch..."
     sleep 5
 done
-echo -e "${GREEN}✅ Elasticsearch pronto${NC}"
+echo -e "${GREEN}✅ OpenSearch pronto${NC}"
 
 # Scarica Magento se src è vuota
 if [ ! -f "src/composer.json" ]; then
     echo ""
     echo "📥 Download di Magento 2.4.7..."
     
-    # Copia auth.json nel container
+    # Copia auth.json nella directory home del container e crea la directory .composer
+    docker-compose exec -T -u root php mkdir -p /var/www/.composer
+    docker-compose exec -T -u root php chown -R www:www /var/www/.composer
     docker cp auth.json $(docker-compose ps -q php):/var/www/.composer/auth.json
+    docker-compose exec -T -u root php chown www:www /var/www/.composer/auth.json
+    
+    # Imposta permessi sulla directory di lavoro
+    docker-compose exec -T -u root php chown -R www:www /var/www/html
     
     docker-compose exec -T php composer create-project \
         --repository-url=https://repo.magento.com/ \
         magento/project-community-edition=2.4.7 \
         /tmp/magento
     
-    docker-compose exec -T php cp -r /tmp/magento/. /var/www/html/
-    docker-compose exec -T php rm -rf /tmp/magento
+    docker-compose exec -T -u root php cp -r /tmp/magento/. /var/www/html/
+    docker-compose exec -T -u root php rm -rf /tmp/magento
+    docker-compose exec -T -u root php chown -R www:www /var/www/html
     
     echo -e "${GREEN}✅ Magento scaricato${NC}"
 fi
@@ -108,9 +118,9 @@ if [ ! -f "src/app/etc/env.php" ]; then
         --currency=EUR \
         --timezone=Europe/Rome \
         --use-rewrites=1 \
-        --search-engine=elasticsearch8 \
-        --elasticsearch-host=elasticsearch \
-        --elasticsearch-port=9200 \
+        --search-engine=opensearch \
+        --opensearch-host=opensearch \
+        --opensearch-port=9200 \
         --amqp-host=rabbitmq \
         --amqp-port=5672 \
         --amqp-user=magento \
