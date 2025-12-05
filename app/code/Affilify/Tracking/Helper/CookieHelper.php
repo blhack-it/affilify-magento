@@ -75,12 +75,12 @@ class CookieHelper
      */
     public function setTrackingCookie(string $value): void
     {
-        $this->logger->info('CookieHelper: setTrackingCookie called with value: ' . $value);
-        
+        $this->logger->debug('CookieHelper: setTrackingCookie called');
+
         try {
             $duration = $this->config->getCookieDurationSeconds();
-            $this->logger->info('CookieHelper: cookie duration = ' . $duration);
-            
+            $this->logger->debug('CookieHelper: cookie duration = ' . $duration);
+
             $metadata = $this->cookieMetadataFactory
                 ->createPublicCookieMetadata()
                 ->setDuration($duration)
@@ -88,15 +88,15 @@ class CookieHelper
                 ->setHttpOnly(false)
                 ->setSameSite('Lax');
 
-            $this->logger->info('CookieHelper: setting cookie ' . self::COOKIE_NAME);
-            
+            $this->logger->debug('CookieHelper: setting cookie ' . self::COOKIE_NAME);
+
             $this->cookieManager->setPublicCookie(
                 self::COOKIE_NAME,
                 $value,
                 $metadata
             );
-            
-            $this->logger->info('CookieHelper: cookie set successfully');
+
+            $this->logger->debug('CookieHelper: cookie set successfully');
         } catch (\Exception $e) {
             $this->logger->error('CookieHelper: error setting cookie - ' . $e->getMessage());
         }
@@ -121,10 +121,11 @@ class CookieHelper
     {
         $metadata = $this->cookieMetadataFactory
             ->createPublicCookieMetadata()
-            ->setPath($this->sessionManager->getCookiePath())
+            ->setPath('/')
             ->setDomain($this->sessionManager->getCookieDomain());
 
         $this->cookieManager->deleteCookie(self::COOKIE_NAME, $metadata);
+        $this->logger->debug('CookieHelper: tracking cookie deleted');
     }
 
     /**

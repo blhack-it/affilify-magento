@@ -8,7 +8,7 @@
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system.xsd">
     <system>
         <tab id="affilify" translate="label" sortOrder="400">
             <label>Affilify</label>
@@ -38,6 +38,11 @@
                     <label>Cookie Duration (Days)</label>
                     <comment>Number of days to keep the tracking cookie.</comment>
                     <validate>required-entry validate-digits validate-greater-than-zero</validate>
+                </field>
+                <field id="debug_mode" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Debug Mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Enable verbose logging for troubleshooting. Logs will be written to var/log/affilify_tracking.log</comment>
                 </field>
             </group>
         </section>

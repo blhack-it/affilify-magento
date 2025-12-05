@@ -58,6 +58,21 @@ interface ConversionMessageInterface
     public function setCheckoutTotal(string $checkoutTotal): self;
 
     /**
+     * Get currency code
+     *
+     * @return string
+     */
+    public function getCurrency(): string;
+
+    /**
+     * Set currency code
+     *
+     * @param string $currency
+     * @return self
+     */
+    public function setCurrency(string $currency): self;
+
+    /**
      * Get referer URL
      *
      * @return string

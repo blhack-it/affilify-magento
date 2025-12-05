@@ -32,6 +32,11 @@ class ConversionMessage implements ConversionMessageInterface
     /**
      * @var string
      */
+    private string $currency = '';
+
+    /**
+     * @var string
+     */
     private string $referer = '';
 
     /**
@@ -92,6 +97,23 @@ class ConversionMessage implements ConversionMessageInterface
     public function setCheckoutTotal(string $checkoutTotal): ConversionMessageInterface
     {
         $this->checkoutTotal = $checkoutTotal;
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCurrency(): string
+    {
+        return $this->currency;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setCurrency(string $currency): ConversionMessageInterface
+    {
+        $this->currency = $currency;
         return $this;
     }
 

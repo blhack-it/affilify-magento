@@ -37,11 +37,6 @@
     </type>
 
     <!-- Inject Logger into Observers -->
-    <type name="Affilify\Tracking\Observer\CaptureClickObserver">
-        <arguments>
-            <argument name="logger" xsi:type="object">AffilfyTrackingLogger</argument>
-        </arguments>
-    </type>
     <type name="Affilify\Tracking\Observer\TrackConversionObserver">
         <arguments>
             <argument name="logger" xsi:type="object">AffilfyTrackingLogger</argument>

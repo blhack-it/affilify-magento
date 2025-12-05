@@ -9,12 +9,12 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/consumer.xsd">
-    <consumer name="affilify.tracking.click.consumer"
+    <consumer name="affilify.tracking.click"
               queue="affilify.tracking.click"
               handler="Affilify\Tracking\Model\Queue\ClickConsumer::process"
               consumerInstance="Magento\Framework\MessageQueue\Consumer"
               connection="db"/>
-    <consumer name="affilify.tracking.conversion.consumer"
+    <consumer name="affilify.tracking.conversion"
               queue="affilify.tracking.conversion"
               handler="Affilify\Tracking\Model\Queue\ConversionConsumer::process"
               consumerInstance="Magento\Framework\MessageQueue\Consumer"

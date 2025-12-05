@@ -20,6 +20,7 @@ class Config extends AbstractHelper
     private const XML_PATH_TRACKING_DOMAIN = 'affilify_tracking/general/tracking_domain';
     private const XML_PATH_PARAMETER_NAME = 'affilify_tracking/general/parameter_name';
     private const XML_PATH_COOKIE_DURATION = 'affilify_tracking/general/cookie_duration';
+    private const XML_PATH_DEBUG_MODE = 'affilify_tracking/general/debug_mode';
 
     /**
      * Check if tracking is enabled
@@ -114,5 +115,20 @@ class Config extends AbstractHelper
     {
         $domain = $this->getTrackingDomain($storeId);
         return $domain ? 'https://' . rtrim($domain, '/') . '/m/conv' : '';
+    }
+
+    /**
+     * Check if debug mode is enabled
+     *
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function isDebugMode(?int $storeId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_DEBUG_MODE,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
     }
 }

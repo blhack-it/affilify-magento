@@ -6,7 +6,9 @@
  * Configure Magento module with Tracking Domain: host.docker.internal:3000
  */
 
-const http = require('http');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
 const PORT = 3000;
 
@@ -16,7 +18,13 @@ const events = {
   conversions: []
 };
 
-const server = http.createServer((req, res) => {
+// SSL options - use self-signed cert
+const sslOptions = {
+  key: fs.readFileSync(path.join(__dirname, 'certs', 'server.key')),
+  cert: fs.readFileSync(path.join(__dirname, 'certs', 'server.crt'))
+};
+
+const server = https.createServer(sslOptions, (req, res) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     res.writeHead(200, {
@@ -139,9 +147,9 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`
 ╔════════════════════════════════════════════════════════════╗
-║         Affilify Mock API Server                           ║
+║         Affilify Mock API Server (HTTPS)                   ║
 ╠════════════════════════════════════════════════════════════╣
-║  Server running on http://0.0.0.0:${PORT}                      ║
+║  Server running on https://0.0.0.0:${PORT}                     ║
 ╠════════════════════════════════════════════════════════════╣
 ║  Endpoints:                                                ║
 ║    POST /m/click  - Receive click tracking                 ║

@@ -13,9 +13,10 @@
         <affilify_tracking>
             <general>
                 <enabled>1</enabled>
-                <tracking_domain></tracking_domain>
+                <tracking_domain>localhost</tracking_domain>
                 <parameter_name>affilify_id</parameter_name>
                 <cookie_duration>30</cookie_duration>
+                <debug_mode>1</debug_mode>
             </general>
         </affilify_tracking>
     </default>

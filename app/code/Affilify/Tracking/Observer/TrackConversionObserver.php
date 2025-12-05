@@ -95,38 +95,38 @@ class TrackConversionObserver implements ObserverInterface
      */
     public function execute(Observer $observer): void
     {
-        $this->logger->info('TrackConversionObserver: execute() called');
-        
+        $this->logger->debug('TrackConversionObserver: execute() called');
+
         // Check if tracking is enabled
         if (!$this->config->isEnabled()) {
-            $this->logger->info('TrackConversionObserver: module disabled');
+            $this->logger->debug('TrackConversionObserver: module disabled');
             return;
         }
 
         // Check if we have a tracking cookie
         $affilfyId = $this->cookieHelper->getTrackingCookie();
-        $this->logger->info('TrackConversionObserver: cookie value = ' . ($affilfyId ?: 'null'));
-        
+        $this->logger->debug('TrackConversionObserver: cookie present = ' . ($affilfyId ? 'yes' : 'no'));
+
         if (empty($affilfyId)) {
-            $this->logger->info('TrackConversionObserver: no tracking cookie, skipping');
+            $this->logger->debug('TrackConversionObserver: no tracking cookie, skipping');
             return;
         }
 
         // Get tracking domain
         $trackingDomain = $this->config->getTrackingDomain();
         if (empty($trackingDomain)) {
-            $this->logger->info('TrackConversionObserver: no tracking domain configured');
+            $this->logger->warning('TrackConversionObserver: no tracking domain configured');
             return;
         }
 
         // Get the order from checkout session
         $order = $this->checkoutSession->getLastRealOrder();
         if (!$order || !$order->getId()) {
-            $this->logger->info('TrackConversionObserver: no order found');
+            $this->logger->debug('TrackConversionObserver: no order found');
             return;
         }
 
-        $this->logger->info('TrackConversionObserver: tracking conversion for order ' . $order->getIncrementId() . ', total: ' . $order->getGrandTotal());
+        $this->logger->info('TrackConversionObserver: tracking conversion for order ' . $order->getIncrementId());
 
         // Publish conversion message to queue
         /** @var ConversionMessageInterface $conversionMessage */
@@ -134,15 +134,16 @@ class TrackConversionObserver implements ObserverInterface
         $conversionMessage->setAffilfyId($affilfyId)
             ->setOrderId($order->getIncrementId())
             ->setCheckoutTotal((string) $order->getGrandTotal())
+            ->setCurrency($order->getOrderCurrencyCode() ?: 'USD')
             ->setReferer($this->httpHeader->getHttpReferer() ?: '-')
-            ->setTimestamp(date('Y-m-d H:i:s'))
+            ->setTimestamp((new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('c'))
             ->setTrackingDomain($trackingDomain);
 
         $this->publisher->publish('affilify.tracking.conversion', $conversionMessage);
-        $this->logger->info('TrackConversionObserver: conversion message published to queue');
+        $this->logger->debug('TrackConversionObserver: conversion message published to queue');
 
         // Delete the tracking cookie after successful conversion
         $this->cookieHelper->deleteTrackingCookie();
-        $this->logger->info('TrackConversionObserver: tracking cookie deleted');
+        $this->logger->debug('TrackConversionObserver: tracking cookie deleted');
     }
 }
