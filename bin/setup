@@ -31,7 +31,7 @@ if [ ! -f "auth.json" ]; then
     echo ""
     read -p "Inserisci la tua Public Key: " PUBLIC_KEY
     read -p "Inserisci la tua Private Key: " PRIVATE_KEY
-    
+
     cat > auth.json << EOF
 {
     "http-basic": {
@@ -51,7 +51,7 @@ docker-compose up -d
 
 echo ""
 echo "⏳ Attendo che i servizi siano pronti..."
-sleep 10
+sleep 5
 
 # Verifica che il database sia pronto
 echo "🔍 Verifico connessione al database..."
@@ -75,26 +75,28 @@ echo -e "${GREEN}✅ OpenSearch pronto${NC}"
 # Scarica Magento se src è vuota
 if [ ! -f "src/composer.json" ]; then
     echo ""
-    echo "📥 Download di Magento 2.4.7..."
-    
-    # Copia auth.json nella directory home del container e crea la directory .composer
-    docker-compose exec -T -u root php mkdir -p /var/www/.composer
-    docker-compose exec -T -u root php chown -R www:www /var/www/.composer
-    docker cp auth.json $(docker-compose ps -q php):/var/www/.composer/auth.json
-    docker-compose exec -T -u root php chown www:www /var/www/.composer/auth.json
-    
-    # Imposta permessi sulla directory di lavoro
-    docker-compose exec -T -u root php chown -R www:www /var/www/html
-    
-    docker-compose exec -T php composer create-project \
+    echo "📥 Download di Magento 2.4.7-p3..."
+
+    # Pulisci eventuali tentativi precedenti
+    docker-compose exec -T -u root php rm -rf /tmp/magento
+
+    # Copia auth.json direttamente nella directory di lavoro (più affidabile)
+    docker cp auth.json $(docker-compose ps -q php):/var/www/html/auth.json
+    docker-compose exec -T -u root php chown www:www /var/www/html/auth.json
+
+    # Imposta COMPOSER_AUTH come variabile d'ambiente
+    AUTH_JSON=$(cat auth.json)
+
+    docker-compose exec -T -e COMPOSER_AUTH="$AUTH_JSON" php composer create-project \
         --repository-url=https://repo.magento.com/ \
-        magento/project-community-edition=2.4.7 \
+        --no-audit \
+        magento/project-community-edition=2.4.7-p3 \
         /tmp/magento
-    
+
     docker-compose exec -T -u root php cp -r /tmp/magento/. /var/www/html/
     docker-compose exec -T -u root php rm -rf /tmp/magento
     docker-compose exec -T -u root php chown -R www:www /var/www/html
-    
+
     echo -e "${GREEN}✅ Magento scaricato${NC}"
 fi
 
@@ -102,7 +104,7 @@ fi
 if [ ! -f "src/app/etc/env.php" ]; then
     echo ""
     echo "🔧 Installazione di Magento..."
-    
+
     docker-compose exec -T php bin/magento setup:install \
         --base-url=http://localhost \
         --db-host=db \
@@ -114,7 +116,7 @@ if [ ! -f "src/app/etc/env.php" ]; then
         --admin-email=admin@example.com \
         --admin-user=admin \
         --admin-password=Admin123! \
-        --language=it_IT \
+        --language=en_US \
         --currency=EUR \
         --timezone=Europe/Rome \
         --use-rewrites=1 \
@@ -126,7 +128,7 @@ if [ ! -f "src/app/etc/env.php" ]; then
         --amqp-user=magento \
         --amqp-password=magento \
         --amqp-virtualhost=/
-    
+
     echo -e "${GREEN}✅ Magento installato${NC}"
 fi
 
@@ -152,8 +154,32 @@ docker-compose exec -T php bin/magento module:disable Magento_AdminAdobeImsTwoFa
 docker-compose exec -T php bin/magento setup:upgrade
 docker-compose exec -T php bin/magento cache:flush
 
+# Installa Sample Data (Luma theme con prodotti demo)
+echo ""
+echo "🎨 Installazione Sample Data (Luma theme)..."
+docker-compose exec -T php bin/magento sampledata:deploy || true
+docker-compose exec -T php bin/magento setup:upgrade || true
+echo -e "${GREEN}✅ Sample Data installato${NC}"
+
+# Configura il modulo Affilify Tracking
+echo ""
+echo "⚙️  Configurazione modulo Affilify Tracking..."
+docker-compose exec -T php bin/magento config:set affilify_tracking/general/enabled 1
+docker-compose exec -T php bin/magento config:set affilify_tracking/general/tracking_domain "mock-api:3000"
+docker-compose exec -T php bin/magento cache:flush
+echo -e "${GREEN}✅ Modulo Affilify configurato${NC}"
+
+# Reindex per mostrare prodotti
+echo ""
+echo "🔄 Reindex catalogo..."
+docker-compose exec -T php bin/magento indexer:reindex
+docker-compose exec -T php bin/magento cache:flush
+
 # Imposta permessi
 docker-compose exec -T php chmod -R 777 var generated pub/static
+
+# Ottieni l'URI admin
+ADMIN_URI=$(docker-compose exec -T php bin/magento info:adminuri | grep -o '/admin[^"]*' | tr -d '\r')
 
 echo ""
 echo -e "${GREEN}=================================================="
@@ -161,13 +187,13 @@ echo "✅ Setup completato!"
 echo "==================================================${NC}"
 echo ""
 echo "🌐 Frontend:     http://localhost"
-echo "🔧 Admin Panel:  http://localhost/admin"
+echo "🔧 Admin Panel:  http://localhost${ADMIN_URI}"
 echo "   Username:     admin"
 echo "   Password:     Admin123!"
 echo ""
 echo "📧 Mailhog:      http://localhost:8025"
 echo "🐰 RabbitMQ:     http://localhost:15672 (magento/magento)"
-echo "🔍 Elasticsearch: http://localhost:9200"
+echo "🔍 OpenSearch:   http://localhost:9200"
 echo ""
 echo "📝 Log Affilify: docker-compose exec php tail -f var/log/affilify_tracking.log"
 echo ""

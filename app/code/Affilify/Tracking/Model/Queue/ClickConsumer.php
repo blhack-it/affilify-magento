@@ -64,7 +64,9 @@ class ClickConsumer
             return;
         }
 
-        $apiUrl = 'https://' . rtrim($trackingDomain, '/') . '/m/click';
+        // Use http for local/docker testing, https for production
+        $scheme = (strpos($trackingDomain, 'localhost') !== false || strpos($trackingDomain, 'mock-api') !== false) ? 'http' : 'https';
+        $apiUrl = $scheme . '://' . rtrim($trackingDomain, '/') . '/m/click';
 
         $payload = [
             'affilify_id' => $message->getAffilfyId(),

@@ -25,6 +25,8 @@ services:
       - redis
       - opensearch
       - rabbitmq
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - magento
 
@@ -82,6 +84,18 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+    networks:
+      - magento
+
+  # Mock API server for testing Affilify tracking
+  mock-api:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./mock-api:/app
+    command: node server.js
+    ports:
+      - "3000:3000"
     networks:
       - magento
 

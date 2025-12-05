@@ -13,12 +13,10 @@
               queue="affilify.tracking.click"
               handler="Affilify\Tracking\Model\Queue\ClickConsumer::process"
               consumerInstance="Magento\Framework\MessageQueue\Consumer"
-              connection="db"
-              maxRetries="3"/>
+              connection="db"/>
     <consumer name="affilify.tracking.conversion.consumer"
               queue="affilify.tracking.conversion"
               handler="Affilify\Tracking\Model\Queue\ConversionConsumer::process"
               consumerInstance="Magento\Framework\MessageQueue\Consumer"
-              connection="db"
-              maxRetries="3"/>
+              connection="db"/>
 </config>

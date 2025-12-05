@@ -88,7 +88,7 @@ class CaptureClickPlugin
     public function beforeSendResponse(ResponseInterface $subject): void
     {
         $this->logger->info('CaptureClickPlugin: beforeSendResponse called');
-        
+
         if (!$this->config->isEnabled()) {
             $this->logger->info('CaptureClickPlugin: module disabled');
             return;
@@ -96,7 +96,7 @@ class CaptureClickPlugin
 
         $paramName = $this->config->getParameterName();
         $affiliateId = $this->request->getParam($paramName);
-        
+
         $this->logger->info('CaptureClickPlugin: looking for param "' . $paramName . '", found: "' . ($affiliateId ?? 'null') . '"');
 
         if (empty($affiliateId)) {
@@ -119,7 +119,7 @@ class CaptureClickPlugin
                 $affiliateId,
                 $metadata
             );
-            
+
             $this->logger->info('CaptureClickPlugin: cookie set successfully');
 
             // Publish to queue for async processing
@@ -129,9 +129,10 @@ class CaptureClickPlugin
             $clickMessage->setUserAgent((string)($this->request->getHeader('User-Agent') ?: ''));
             $clickMessage->setReferer((string)($this->request->getHeader('Referer') ?: ''));
             $clickMessage->setTimestamp((string)time());
+            $clickMessage->setTrackingDomain($this->config->getTrackingDomain());
 
             $this->publisher->publish(self::QUEUE_TOPIC, $clickMessage);
-            $this->logger->info('CaptureClickPlugin: click message published to queue');
+            $this->logger->info('CaptureClickPlugin: click message published to queue with tracking domain: ' . $this->config->getTrackingDomain());
         } catch (\Exception $e) {
             $this->logger->error('CaptureClickPlugin: error - ' . $e->getMessage());
         }
