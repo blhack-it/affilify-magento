@@ -69,15 +69,15 @@ class ClickConsumerTest extends TestCase
     }
 
     /**
-     * Test process skips when no tracking domain
+     * Test process skips when no API key configured
      */
-    public function testProcessSkipsWhenNoTrackingDomain(): void
+    public function testProcessSkipsWhenNoApiKey(): void
     {
-        $this->messageMock->method('getTrackingDomain')->willReturn('');
+        $this->configMock->method('getApiKey')->willReturn('');
 
         $this->loggerMock->expects($this->once())
             ->method('warning')
-            ->with('Click tracking skipped: No tracking domain configured');
+            ->with('Click tracking skipped: No API key configured');
 
         $this->curlMock->expects($this->never())
             ->method('post');
@@ -90,10 +90,11 @@ class ClickConsumerTest extends TestCase
      */
     public function testProcessSuccessfulTracking(): void
     {
+        $this->setupConfigMock();
         $this->setupMessageMock();
 
         $this->jsonMock->method('serialize')
-            ->willReturn('{"affilify_id":"test-123"}');
+            ->willReturn('{"affilify_id":"test-123","platform":"magento"}');
 
         $this->curlMock->method('getStatus')->willReturn(200);
 
@@ -109,6 +110,7 @@ class ClickConsumerTest extends TestCase
      */
     public function testProcessDoesNotRetryOn4xxError(): void
     {
+        $this->setupConfigMock();
         $this->setupMessageMock();
 
         $this->jsonMock->method('serialize')->willReturn('{}');
@@ -131,6 +133,7 @@ class ClickConsumerTest extends TestCase
      */
     public function testProcessRetriesOn429Error(): void
     {
+        $this->setupConfigMock();
         $this->setupMessageMock();
 
         $this->jsonMock->method('serialize')->willReturn('{}');
@@ -151,25 +154,20 @@ class ClickConsumerTest extends TestCase
     }
 
     /**
-     * Test URL building with HTTPS
+     * Test correct API URL is used
      */
-    public function testBuildApiUrlUsesHttps(): void
+    public function testUsesCorrectApiUrl(): void
     {
-        $this->messageMock->method('getTrackingDomain')->willReturn('t.example.com');
-        $this->messageMock->method('getAffilfyId')->willReturn('test');
-        $this->messageMock->method('getReferer')->willReturn('');
-        $this->messageMock->method('getIp')->willReturn('');
-        $this->messageMock->method('getUserAgent')->willReturn('');
-        $this->messageMock->method('getTimestamp')->willReturn('');
+        $this->setupConfigMock();
+        $this->setupMessageMock();
 
         $this->jsonMock->method('serialize')->willReturn('{}');
         $this->curlMock->method('getStatus')->willReturn(200);
 
-        // Capture the URL passed to post()
         $this->curlMock->expects($this->once())
             ->method('post')
             ->with(
-                $this->stringContains('https://t.example.com/m/click'),
+                $this->equalTo('https://dashboard.affilify.it/api/track/click'),
                 $this->anything()
             );
 
@@ -177,25 +175,22 @@ class ClickConsumerTest extends TestCase
     }
 
     /**
-     * Test URL building preserves existing scheme
+     * Test custom API URL is used when configured
      */
-    public function testBuildApiUrlPreservesExistingScheme(): void
+    public function testUsesCustomApiUrl(): void
     {
-        $this->messageMock->method('getTrackingDomain')->willReturn('http://localhost:3000');
-        $this->messageMock->method('getAffilfyId')->willReturn('test');
-        $this->messageMock->method('getReferer')->willReturn('');
-        $this->messageMock->method('getIp')->willReturn('');
-        $this->messageMock->method('getUserAgent')->willReturn('');
-        $this->messageMock->method('getTimestamp')->willReturn('');
+        $this->configMock->method('getApiKey')->willReturn('test-api-key');
+        $this->configMock->method('getClickApiUrl')
+            ->willReturn('https://custom.example.com/api/track/click');
+        $this->setupMessageMock();
 
         $this->jsonMock->method('serialize')->willReturn('{}');
         $this->curlMock->method('getStatus')->willReturn(200);
 
-        // Should use the provided scheme
         $this->curlMock->expects($this->once())
             ->method('post')
             ->with(
-                $this->stringContains('http://localhost:3000/m/click'),
+                $this->equalTo('https://custom.example.com/api/track/click'),
                 $this->anything()
             );
 
@@ -203,29 +198,35 @@ class ClickConsumerTest extends TestCase
     }
 
     /**
-     * Test handles trailing slash in domain
+     * Test API key header is set
      */
-    public function testBuildApiUrlHandlesTrailingSlash(): void
+    public function testSetsApiKeyHeader(): void
     {
-        $this->messageMock->method('getTrackingDomain')->willReturn('t.example.com/');
-        $this->messageMock->method('getAffilfyId')->willReturn('test');
-        $this->messageMock->method('getReferer')->willReturn('');
-        $this->messageMock->method('getIp')->willReturn('');
-        $this->messageMock->method('getUserAgent')->willReturn('');
-        $this->messageMock->method('getTimestamp')->willReturn('');
+        $this->setupConfigMock();
+        $this->setupMessageMock();
 
         $this->jsonMock->method('serialize')->willReturn('{}');
         $this->curlMock->method('getStatus')->willReturn(200);
 
-        // Should build correct URL without double slashes between domain and path
-        $this->curlMock->expects($this->once())
-            ->method('post')
-            ->with(
-                $this->equalTo('https://t.example.com/m/click'),
-                $this->anything()
+        $this->curlMock->expects($this->exactly(3))
+            ->method('addHeader')
+            ->withConsecutive(
+                ['Content-Type', 'application/json'],
+                ['Accept', 'application/json'],
+                ['X-Affilify-Api-Key', 'test-api-key']
             );
 
         $this->consumer->process($this->messageMock);
+    }
+
+    /**
+     * Setup config mock with default values
+     */
+    private function setupConfigMock(): void
+    {
+        $this->configMock->method('getApiKey')->willReturn('test-api-key');
+        $this->configMock->method('getClickApiUrl')
+            ->willReturn('https://dashboard.affilify.it/api/track/click');
     }
 
     /**
@@ -233,7 +234,6 @@ class ClickConsumerTest extends TestCase
      */
     private function setupMessageMock(): void
     {
-        $this->messageMock->method('getTrackingDomain')->willReturn('t.example.com');
         $this->messageMock->method('getAffilfyId')->willReturn('test-affiliate-123');
         $this->messageMock->method('getReferer')->willReturn('https://google.com');
         $this->messageMock->method('getIp')->willReturn('192.168.x.x');

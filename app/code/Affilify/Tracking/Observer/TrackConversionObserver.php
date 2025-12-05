@@ -112,13 +112,6 @@ class TrackConversionObserver implements ObserverInterface
             return;
         }
 
-        // Get tracking domain
-        $trackingDomain = $this->config->getTrackingDomain();
-        if (empty($trackingDomain)) {
-            $this->logger->warning('TrackConversionObserver: no tracking domain configured');
-            return;
-        }
-
         // Get the order from checkout session
         $order = $this->checkoutSession->getLastRealOrder();
         if (!$order || !$order->getId()) {
@@ -134,10 +127,7 @@ class TrackConversionObserver implements ObserverInterface
         $conversionMessage->setAffilfyId($affilfyId)
             ->setOrderId($order->getIncrementId())
             ->setCheckoutTotal((string) $order->getGrandTotal())
-            ->setCurrency($order->getOrderCurrencyCode() ?: 'USD')
-            ->setReferer($this->httpHeader->getHttpReferer() ?: '-')
-            ->setTimestamp((new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('c'))
-            ->setTrackingDomain($trackingDomain);
+            ->setCurrency($order->getOrderCurrencyCode() ?: 'EUR');
 
         $this->publisher->publish('affilify.tracking.conversion', $conversionMessage);
         $this->logger->debug('TrackConversionObserver: conversion message published to queue');

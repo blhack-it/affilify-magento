@@ -91,32 +91,61 @@ class ConfigTest extends TestCase
     }
 
     /**
-     * Test getTrackingDomain returns configured domain
+     * Test getApiKey returns configured key
      */
-    public function testGetTrackingDomain(): void
+    public function testGetApiKey(): void
     {
-        $domain = 't.example.com';
+        $apiKey = 'test-api-key-123';
 
         $this->scopeConfigMock->method('getValue')
             ->with(
-                'affilify_tracking/general/tracking_domain',
+                'affilify_tracking/general/api_key',
                 ScopeInterface::SCOPE_STORE,
                 null
             )
-            ->willReturn($domain);
+            ->willReturn($apiKey);
 
-        $this->assertEquals($domain, $this->config->getTrackingDomain());
+        $this->assertEquals($apiKey, $this->config->getApiKey());
     }
 
     /**
-     * Test getTrackingDomain returns empty string when not configured
+     * Test getApiKey returns empty string when not configured
      */
-    public function testGetTrackingDomainReturnsEmptyWhenNull(): void
+    public function testGetApiKeyReturnsEmptyWhenNull(): void
     {
         $this->scopeConfigMock->method('getValue')
             ->willReturn(null);
 
-        $this->assertEquals('', $this->config->getTrackingDomain());
+        $this->assertEquals('', $this->config->getApiKey());
+    }
+
+    /**
+     * Test getApiUrl returns configured URL
+     */
+    public function testGetApiUrl(): void
+    {
+        $apiUrl = 'https://custom.api.example.com/track';
+
+        $this->scopeConfigMock->method('getValue')
+            ->with(
+                'affilify_tracking/general/api_url',
+                ScopeInterface::SCOPE_STORE,
+                null
+            )
+            ->willReturn($apiUrl);
+
+        $this->assertEquals($apiUrl, $this->config->getApiUrl());
+    }
+
+    /**
+     * Test getApiUrl returns default when not configured
+     */
+    public function testGetApiUrlReturnsDefaultWhenEmpty(): void
+    {
+        $this->scopeConfigMock->method('getValue')
+            ->willReturn('');
+
+        $this->assertEquals('https://dashboard.affilify.it/api/track', $this->config->getApiUrl());
     }
 
     /**
@@ -185,36 +214,36 @@ class ConfigTest extends TestCase
      */
     public function testGetClickApiUrl(): void
     {
-        $domain = 't.example.com';
+        $apiUrl = 'https://dashboard.affilify.it/api/track';
 
         $this->scopeConfigMock->method('getValue')
-            ->willReturn($domain);
+            ->willReturn($apiUrl);
 
-        $this->assertEquals('https://t.example.com/m/click', $this->config->getClickApiUrl());
+        $this->assertEquals('https://dashboard.affilify.it/api/track/click', $this->config->getClickApiUrl());
     }
 
     /**
-     * Test getClickApiUrl handles trailing slash
+     * Test getClickApiUrl with custom URL
      */
-    public function testGetClickApiUrlHandlesTrailingSlash(): void
+    public function testGetClickApiUrlWithCustomUrl(): void
     {
-        $domain = 't.example.com/';
+        $apiUrl = 'https://custom.example.com/api/track';
 
         $this->scopeConfigMock->method('getValue')
-            ->willReturn($domain);
+            ->willReturn($apiUrl);
 
-        $this->assertEquals('https://t.example.com/m/click', $this->config->getClickApiUrl());
+        $this->assertEquals('https://custom.example.com/api/track/click', $this->config->getClickApiUrl());
     }
 
     /**
-     * Test getClickApiUrl returns empty when no domain
+     * Test getClickApiUrl returns default URL when not configured
      */
-    public function testGetClickApiUrlReturnsEmptyWhenNoDomain(): void
+    public function testGetClickApiUrlReturnsDefaultWhenEmpty(): void
     {
         $this->scopeConfigMock->method('getValue')
             ->willReturn('');
 
-        $this->assertEquals('', $this->config->getClickApiUrl());
+        $this->assertEquals('https://dashboard.affilify.it/api/track/click', $this->config->getClickApiUrl());
     }
 
     /**
@@ -222,12 +251,25 @@ class ConfigTest extends TestCase
      */
     public function testGetConversionApiUrl(): void
     {
-        $domain = 't.example.com';
+        $apiUrl = 'https://dashboard.affilify.it/api/track';
 
         $this->scopeConfigMock->method('getValue')
-            ->willReturn($domain);
+            ->willReturn($apiUrl);
 
-        $this->assertEquals('https://t.example.com/m/conv', $this->config->getConversionApiUrl());
+        $this->assertEquals('https://dashboard.affilify.it/api/track/conversion', $this->config->getConversionApiUrl());
+    }
+
+    /**
+     * Test getConversionApiUrl with custom URL
+     */
+    public function testGetConversionApiUrlWithCustomUrl(): void
+    {
+        $apiUrl = 'https://custom.example.com/api/track';
+
+        $this->scopeConfigMock->method('getValue')
+            ->willReturn($apiUrl);
+
+        $this->assertEquals('https://custom.example.com/api/track/conversion', $this->config->getConversionApiUrl());
     }
 
     /**

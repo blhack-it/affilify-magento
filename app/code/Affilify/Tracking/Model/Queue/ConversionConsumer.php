@@ -72,26 +72,24 @@ class ConversionConsumer
      */
     public function process(ConversionMessageInterface $message): void
     {
-        $trackingDomain = $message->getTrackingDomain();
+        $apiKey = $this->config->getApiKey();
 
-        if (empty($trackingDomain)) {
-            $this->logger->warning('Conversion tracking skipped: No tracking domain configured');
+        if (empty($apiKey)) {
+            $this->logger->warning('Conversion tracking skipped: No API key configured');
             return;
         }
 
-        $apiUrl = $this->buildApiUrl($trackingDomain, '/m/conv');
+        $apiUrl = $this->config->getConversionApiUrl();
 
         $payload = [
             'affilify_id' => $message->getAffilfyId(),
             'order_id' => $message->getOrderId(),
-            'checkout_total' => $message->getCheckoutTotal(),
+            'amount' => $message->getCheckoutTotal(),
             'currency' => $message->getCurrency(),
-            'referer' => $message->getReferer(),
-            'timestamp' => $message->getTimestamp(),
             'platform' => 'magento'
         ];
 
-        $this->executeWithRetry($apiUrl, $payload, $message->getAffilfyId(), $message->getOrderId(), $trackingDomain);
+        $this->executeWithRetry($apiUrl, $payload, $apiKey, $message->getAffilfyId(), $message->getOrderId());
     }
 
     /**
@@ -99,17 +97,17 @@ class ConversionConsumer
      *
      * @param string $apiUrl
      * @param array $payload
-     * @param string $affilifyId
+     * @param string $apiKey
+     * @param string $refCode
      * @param string $orderId
-     * @param string $trackingDomain
      * @return void
      */
     private function executeWithRetry(
         string $apiUrl,
         array $payload,
-        string $affilifyId,
-        string $orderId,
-        string $trackingDomain
+        string $apiKey,
+        string $refCode,
+        string $orderId
     ): void {
         $attempt = 0;
         $lastException = null;
@@ -126,6 +124,7 @@ class ConversionConsumer
                 ]);
                 $this->curl->addHeader('Content-Type', 'application/json');
                 $this->curl->addHeader('Accept', 'application/json');
+                $this->curl->addHeader('X-Affilify-Api-Key', $apiKey);
                 $this->curl->setTimeout(10);
                 $this->curl->post($apiUrl, $this->json->serialize($payload));
 
@@ -171,27 +170,9 @@ class ConversionConsumer
         $this->logger->error('Conversion tracking failed after all retries', [
             'attempts' => Constants::MAX_RETRIES,
             'order_id' => $orderId,
+            'ref_code' => $refCode,
             'last_status_code' => $lastStatusCode,
-            'last_error' => $lastException ? $lastException->getMessage() : null,
-            'tracking_domain' => $trackingDomain
+            'last_error' => $lastException ? $lastException->getMessage() : null
         ]);
-    }
-
-    /**
-     * Build API URL with HTTPS scheme
-     *
-     * @param string $trackingDomain
-     * @param string $path
-     * @return string
-     */
-    private function buildApiUrl(string $trackingDomain, string $path): string
-    {
-        // Check if domain already has scheme
-        if (preg_match('/^https?:\/\//', $trackingDomain)) {
-            return rtrim($trackingDomain, '/') . $path;
-        }
-
-        // Always use HTTPS
-        return 'https://' . rtrim($trackingDomain, '/') . $path;
     }
 }

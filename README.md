@@ -95,9 +95,9 @@ bin/magento cron:run
 
 ## API Endpoints
 
-The module sends data to your tracking domain:
+The module sends data to your Affilify API:
 
-### Click Endpoint: `POST /m/click`
+### Click Endpoint: `POST /api/track/click`
 
 ```json
 {
@@ -110,16 +110,14 @@ The module sends data to your tracking domain:
 }
 ```
 
-### Conversion Endpoint: `POST /m/conv`
+### Conversion Endpoint: `POST /api/track/conversion`
 
 ```json
 {
   "affilify_id": "abc123",
   "order_id": "000000123",
-  "checkout_total": "199.99",
+  "amount": "199.99",
   "currency": "USD",
-  "referer": "https://yourstore.com/checkout/success",
-  "timestamp": "2024-01-15T10:30:00+00:00",
   "platform": "magento"
 }
 ```

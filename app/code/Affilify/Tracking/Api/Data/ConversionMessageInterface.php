@@ -71,49 +71,4 @@ interface ConversionMessageInterface
      * @return self
      */
     public function setCurrency(string $currency): self;
-
-    /**
-     * Get referer URL
-     *
-     * @return string
-     */
-    public function getReferer(): string;
-
-    /**
-     * Set referer URL
-     *
-     * @param string $referer
-     * @return self
-     */
-    public function setReferer(string $referer): self;
-
-    /**
-     * Get timestamp
-     *
-     * @return string
-     */
-    public function getTimestamp(): string;
-
-    /**
-     * Set timestamp
-     *
-     * @param string $timestamp
-     * @return self
-     */
-    public function setTimestamp(string $timestamp): self;
-
-    /**
-     * Get tracking domain
-     *
-     * @return string
-     */
-    public function getTrackingDomain(): string;
-
-    /**
-     * Set tracking domain
-     *
-     * @param string $trackingDomain
-     * @return self
-     */
-    public function setTrackingDomain(string $trackingDomain): self;
 }

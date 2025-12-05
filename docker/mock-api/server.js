@@ -62,14 +62,14 @@ const server = https.createServer(sslOptions, (req, res) => {
     console.log(`Headers: ${JSON.stringify(req.headers, null, 2)}`);
 
     // Handle different endpoints
-    if (req.url === '/m/click' && req.method === 'POST') {
+    if (req.url === '/click' && req.method === 'POST') {
       console.log(`\n🖱️  CLICK EVENT RECEIVED`);
       console.log(`   Affilify ID: ${data.affilify_id || 'N/A'}`);
       console.log(`   Referer: ${data.referer || 'N/A'}`);
       console.log(`   IP: ${data.ip || 'N/A'}`);
       console.log(`   User Agent: ${data.user_agent || 'N/A'}`);
       console.log(`   Platform: ${data.platform || 'N/A'}`);
-      console.log(`   Timestamp: ${data.timestamp || 'N/A'}`);
+      console.log(`   Timestamp: ${data.timestamp || 'N/A'}`)
 
       events.clicks.push({ ...data, received_at: timestamp });
 
@@ -83,11 +83,11 @@ const server = https.createServer(sslOptions, (req, res) => {
         event_id: events.clicks.length
       }));
 
-    } else if (req.url === '/m/conv' && req.method === 'POST') {
+    } else if (req.url === '/conversion' && req.method === 'POST') {
       console.log(`\n💰 CONVERSION EVENT RECEIVED`);
       console.log(`   Affilify ID: ${data.affilify_id || 'N/A'}`);
       console.log(`   Order ID: ${data.order_id || 'N/A'}`);
-      console.log(`   Checkout Total: €${data.checkout_total || 'N/A'}`);
+      console.log(`   Amount: €${data.amount || 'N/A'}`)
       console.log(`   Referer: ${data.referer || 'N/A'}`);
       console.log(`   Platform: ${data.platform || 'N/A'}`);
       console.log(`   Timestamp: ${data.timestamp || 'N/A'}`);
@@ -132,8 +132,8 @@ const server = https.createServer(sslOptions, (req, res) => {
       res.end(JSON.stringify({
         error: 'Not found',
         available_endpoints: [
-          'POST /m/click - Track clicks',
-          'POST /m/conv - Track conversions',
+          'POST /click - Track clicks',
+          'POST /conversion - Track conversions',
           'GET /events - View all received events',
           'GET /health - Health check'
         ]
@@ -152,13 +152,13 @@ server.listen(PORT, '0.0.0.0', () => {
 ║  Server running on https://0.0.0.0:${PORT}                     ║
 ╠════════════════════════════════════════════════════════════╣
 ║  Endpoints:                                                ║
-║    POST /m/click  - Receive click tracking                 ║
-║    POST /m/conv   - Receive conversion tracking            ║
-║    GET  /events   - View all received events               ║
-║    GET  /health   - Health check                           ║
+║    POST /click      - Receive click tracking               ║
+║    POST /conversion - Receive conversion tracking          ║
+║    GET  /events     - View all received events             ║
+║    GET  /health     - Health check                         ║
 ╠════════════════════════════════════════════════════════════╣
 ║  For Magento module configuration use:                     ║
-║    Tracking Domain: host.docker.internal:${PORT}               ║
+║    API URL: https://host.docker.internal:${PORT}               ║
 ║                                                            ║
 ║  Or add to docker-compose.yml extra_hosts:                 ║
 ║    - "tracking.local:host-gateway"                         ║

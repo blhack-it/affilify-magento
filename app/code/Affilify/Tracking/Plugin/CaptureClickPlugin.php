@@ -151,8 +151,7 @@ class CaptureClickPlugin
                 ->setIp($this->maskIp((string)($this->request->getClientIp() ?: '')))
                 ->setUserAgent((string)($this->request->getHeader('User-Agent') ?: ''))
                 ->setReferer((string)($this->request->getHeader('Referer') ?: ''))
-                ->setTimestamp((new \DateTime())->format(\DateTime::ATOM))
-                ->setTrackingDomain($this->config->getTrackingDomain($storeId));
+                ->setTimestamp((new \DateTime())->format(\DateTime::ATOM));
 
             $this->publisher->publish(Constants::QUEUE_TOPIC_CLICK, $clickMessage);
             $this->logger->debug('Click queued for processing');

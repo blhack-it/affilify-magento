@@ -3,7 +3,6 @@ services:
     image: nginx:1.24-alpine
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./src:/var/www/html:delegated
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
@@ -23,10 +22,10 @@ services:
     depends_on:
       - db
       - redis
-      - opensearch
       - rabbitmq
     extra_hosts:
       - "host.docker.internal:host-gateway"
+      - "dashboard.affilify.it:host-gateway"
     networks:
       - magento
 
@@ -51,21 +50,6 @@ services:
     networks:
       - magento
 
-  opensearch:
-    image: opensearchproject/opensearch:2.12.0
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    environment:
-      - "discovery.type=single-node"
-      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "DISABLE_SECURITY_PLUGIN=true"
-      - "DISABLE_INSTALL_DEMO_CONFIG=true"
-    volumes:
-      - opensearch-data:/usr/share/opensearch/data
-    networks:
-      - magento
-
   rabbitmq:
     image: rabbitmq:3.12-management-alpine
     ports:
@@ -79,29 +63,8 @@ services:
     networks:
       - magento
 
-  mailhog:
-    image: mailhog/mailhog
-    ports:
-      - "1025:1025"
-      - "8025:8025"
-    networks:
-      - magento
-
-  # Mock API server for testing Affilify tracking
-  mock-api:
-    image: node:20-alpine
-    working_dir: /app
-    volumes:
-      - ./docker/mock-api:/app:ro
-    command: node server.js
-    ports:
-      - "3000:3000"
-    networks:
-      - magento
-
 volumes:
   db-data:
-  opensearch-data:
   rabbitmq-data:
 
 networks:

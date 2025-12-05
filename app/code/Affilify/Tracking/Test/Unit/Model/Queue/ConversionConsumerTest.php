@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Affilify\Tracking\Test\Unit\Model\Queue;
 
+use Affilify\Tracking\Api\Constants;
 use Affilify\Tracking\Api\Data\ConversionMessageInterface;
 use Affilify\Tracking\Helper\Config;
 use Affilify\Tracking\Logger\Logger;
@@ -68,15 +69,15 @@ class ConversionConsumerTest extends TestCase
     }
 
     /**
-     * Test process skips when no tracking domain
+     * Test process skips when no API key configured
      */
-    public function testProcessSkipsWhenNoTrackingDomain(): void
+    public function testProcessSkipsWhenNoApiKey(): void
     {
-        $this->messageMock->method('getTrackingDomain')->willReturn('');
+        $this->configMock->method('getApiKey')->willReturn('');
 
         $this->loggerMock->expects($this->once())
             ->method('warning')
-            ->with('Conversion tracking skipped: No tracking domain configured');
+            ->with('Conversion tracking skipped: No API key configured');
 
         $this->curlMock->expects($this->never())
             ->method('post');
@@ -89,10 +90,11 @@ class ConversionConsumerTest extends TestCase
      */
     public function testProcessSuccessfulTracking(): void
     {
+        $this->setupConfigMock();
         $this->setupMessageMock();
 
         $this->jsonMock->method('serialize')
-            ->willReturn('{"affilify_id":"test-123","order_id":"000000001"}');
+            ->willReturn('{"affilify_id":"test-123","order_id":"000000001","platform":"magento"}');
 
         $this->curlMock->method('getStatus')->willReturn(200);
 
@@ -108,6 +110,7 @@ class ConversionConsumerTest extends TestCase
      */
     public function testProcessDoesNotRetryOn4xxError(): void
     {
+        $this->setupConfigMock();
         $this->setupMessageMock();
 
         $this->jsonMock->method('serialize')->willReturn('{}');
@@ -126,17 +129,18 @@ class ConversionConsumerTest extends TestCase
     }
 
     /**
-     * Test 5xx error triggers retry
+     * Test 429 (rate limit) triggers retry
      */
-    public function testProcessRetriesOn5xxError(): void
+    public function testProcessRetriesOn429Error(): void
     {
+        $this->setupConfigMock();
         $this->setupMessageMock();
 
         $this->jsonMock->method('serialize')->willReturn('{}');
 
-        // First call returns 500, second returns 200
+        // First call returns 429, second returns 200
         $this->curlMock->method('getStatus')
-            ->willReturnOnConsecutiveCalls(500, 200);
+            ->willReturnOnConsecutiveCalls(429, 200);
 
         // Should retry
         $this->curlMock->expects($this->exactly(2))
@@ -150,64 +154,20 @@ class ConversionConsumerTest extends TestCase
     }
 
     /**
-     * Test payload contains currency
+     * Test correct API URL is used
      */
-    public function testPayloadContainsCurrency(): void
+    public function testUsesCorrectApiUrl(): void
     {
-        $this->setupMessageMock();
-
-        $capturedPayload = null;
-        $this->jsonMock->method('serialize')
-            ->willReturnCallback(function ($data) use (&$capturedPayload) {
-                $capturedPayload = $data;
-                return json_encode($data);
-            });
-
-        $this->curlMock->method('getStatus')->willReturn(200);
-
-        $this->consumer->process($this->messageMock);
-
-        $this->assertArrayHasKey('currency', $capturedPayload);
-        $this->assertEquals('USD', $capturedPayload['currency']);
-    }
-
-    /**
-     * Test payload contains order_id
-     */
-    public function testPayloadContainsOrderId(): void
-    {
-        $this->setupMessageMock();
-
-        $capturedPayload = null;
-        $this->jsonMock->method('serialize')
-            ->willReturnCallback(function ($data) use (&$capturedPayload) {
-                $capturedPayload = $data;
-                return json_encode($data);
-            });
-
-        $this->curlMock->method('getStatus')->willReturn(200);
-
-        $this->consumer->process($this->messageMock);
-
-        $this->assertArrayHasKey('order_id', $capturedPayload);
-        $this->assertEquals('000000001', $capturedPayload['order_id']);
-    }
-
-    /**
-     * Test URL building with HTTPS
-     */
-    public function testBuildApiUrlUsesHttps(): void
-    {
+        $this->setupConfigMock();
         $this->setupMessageMock();
 
         $this->jsonMock->method('serialize')->willReturn('{}');
         $this->curlMock->method('getStatus')->willReturn(200);
 
-        // Capture the URL passed to post()
         $this->curlMock->expects($this->once())
             ->method('post')
             ->with(
-                $this->stringContains('https://t.example.com/m/conv'),
+                $this->equalTo('https://dashboard.affilify.it/api/track/conversion'),
                 $this->anything()
             );
 
@@ -215,16 +175,68 @@ class ConversionConsumerTest extends TestCase
     }
 
     /**
+     * Test custom API URL is used when configured
+     */
+    public function testUsesCustomApiUrl(): void
+    {
+        $this->configMock->method('getApiKey')->willReturn('test-api-key');
+        $this->configMock->method('getConversionApiUrl')
+            ->willReturn('https://custom.example.com/api/track/conversion');
+        $this->setupMessageMock();
+
+        $this->jsonMock->method('serialize')->willReturn('{}');
+        $this->curlMock->method('getStatus')->willReturn(200);
+
+        $this->curlMock->expects($this->once())
+            ->method('post')
+            ->with(
+                $this->equalTo('https://custom.example.com/api/track/conversion'),
+                $this->anything()
+            );
+
+        $this->consumer->process($this->messageMock);
+    }
+
+    /**
+     * Test API key header is set
+     */
+    public function testSetsApiKeyHeader(): void
+    {
+        $this->setupConfigMock();
+        $this->setupMessageMock();
+
+        $this->jsonMock->method('serialize')->willReturn('{}');
+        $this->curlMock->method('getStatus')->willReturn(200);
+
+        $this->curlMock->expects($this->exactly(3))
+            ->method('addHeader')
+            ->withConsecutive(
+                ['Content-Type', 'application/json'],
+                ['Accept', 'application/json'],
+                ['X-Affilify-Api-Key', 'test-api-key']
+            );
+
+        $this->consumer->process($this->messageMock);
+    }
+
+    /**
+     * Setup config mock with default values
+     */
+    private function setupConfigMock(): void
+    {
+        $this->configMock->method('getApiKey')->willReturn('test-api-key');
+        $this->configMock->method('getConversionApiUrl')
+            ->willReturn('https://dashboard.affilify.it/api/track/conversion');
+    }
+
+    /**
      * Setup common message mock expectations
      */
     private function setupMessageMock(): void
     {
-        $this->messageMock->method('getTrackingDomain')->willReturn('t.example.com');
         $this->messageMock->method('getAffilfyId')->willReturn('test-affiliate-123');
         $this->messageMock->method('getOrderId')->willReturn('000000001');
         $this->messageMock->method('getCheckoutTotal')->willReturn('199.99');
         $this->messageMock->method('getCurrency')->willReturn('USD');
-        $this->messageMock->method('getReferer')->willReturn('https://example.com/checkout');
-        $this->messageMock->method('getTimestamp')->willReturn('2024-01-15T10:30:00+00:00');
     }
 }

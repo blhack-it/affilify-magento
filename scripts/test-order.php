@@ -33,7 +33,7 @@ $cookieManager = $objectManager->get(\Magento\Framework\Stdlib\CookieManagerInte
 $cookieMetadataFactory = $objectManager->get(\Magento\Framework\Stdlib\Cookie\CookieMetadataFactory::class);
 
 // We'll simulate the cookie by setting it directly in superglobal
-$_COOKIE['affilify_tracking'] = 'ORDER_TEST_' . time();
+$_COOKIE['affilify_tracking'] = 'NEWTEST123';
 echo "📍 Affiliate ID: " . $_COOKIE['affilify_tracking'] . "\n";
 
 try {

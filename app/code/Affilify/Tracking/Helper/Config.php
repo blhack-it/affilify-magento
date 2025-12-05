@@ -17,10 +17,16 @@ use Magento\Store\Model\ScopeInterface;
 class Config extends AbstractHelper
 {
     private const XML_PATH_ENABLED = 'affilify_tracking/general/enabled';
-    private const XML_PATH_TRACKING_DOMAIN = 'affilify_tracking/general/tracking_domain';
+    private const XML_PATH_API_KEY = 'affilify_tracking/general/api_key';
+    private const XML_PATH_API_URL = 'affilify_tracking/general/api_url';
     private const XML_PATH_PARAMETER_NAME = 'affilify_tracking/general/parameter_name';
     private const XML_PATH_COOKIE_DURATION = 'affilify_tracking/general/cookie_duration';
     private const XML_PATH_DEBUG_MODE = 'affilify_tracking/general/debug_mode';
+
+    /**
+     * Default Affilify API base URL
+     */
+    private const DEFAULT_API_URL = 'https://dashboard.affilify.it/api/track';
 
     /**
      * Check if tracking is enabled
@@ -38,15 +44,15 @@ class Config extends AbstractHelper
     }
 
     /**
-     * Get the tracking domain
+     * Get the API key
      *
      * @param int|null $storeId
      * @return string
      */
-    public function getTrackingDomain(?int $storeId = null): string
+    public function getApiKey(?int $storeId = null): string
     {
         return (string) $this->scopeConfig->getValue(
-            self::XML_PATH_TRACKING_DOMAIN,
+            self::XML_PATH_API_KEY,
             ScopeInterface::SCOPE_STORE,
             $storeId
         );
@@ -94,27 +100,39 @@ class Config extends AbstractHelper
     }
 
     /**
-     * Get the full API URL for click tracking
+     * Get the API base URL
      *
      * @param int|null $storeId
      * @return string
      */
-    public function getClickApiUrl(?int $storeId = null): string
+    public function getApiUrl(?int $storeId = null): string
     {
-        $domain = $this->getTrackingDomain($storeId);
-        return $domain ? 'https://' . rtrim($domain, '/') . '/m/click' : '';
+        $url = $this->scopeConfig->getValue(
+            self::XML_PATH_API_URL,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+        return $url ?: self::DEFAULT_API_URL;
+    }
+
+    /**
+     * Get the full API URL for click tracking
+     *
+     * @return string
+     */
+    public function getClickApiUrl(): string
+    {
+        return $this->getApiUrl() . '/click';
     }
 
     /**
      * Get the full API URL for conversion tracking
      *
-     * @param int|null $storeId
      * @return string
      */
-    public function getConversionApiUrl(?int $storeId = null): string
+    public function getConversionApiUrl(): string
     {
-        $domain = $this->getTrackingDomain($storeId);
-        return $domain ? 'https://' . rtrim($domain, '/') . '/m/conv' : '';
+        return $this->getApiUrl() . '/conversion';
     }
 
     /**

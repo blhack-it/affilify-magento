@@ -25,10 +25,14 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Enable or disable affiliate conversion tracking.</comment>
                 </field>
-                <field id="tracking_domain" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Tracking Domain</label>
-                    <comment><![CDATA[Your custom tracking domain (e.g., t.yourdomain.com). This domain should be CNAMEd to t.affilify.it]]></comment>
+                <field id="api_key" translate="label comment" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>API Key</label>
+                    <comment><![CDATA[Your Affilify API Key. You can find it in your Affilify dashboard under Advertiser > API tab.]]></comment>
                     <validate>required-entry</validate>
+                </field>
+                <field id="api_url" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>API URL</label>
+                    <comment><![CDATA[Leave empty for default (https://dashboard.affilify.it/api/track). Change only for testing.]]></comment>
                 </field>
                 <field id="parameter_name" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>URL Parameter Name</label>
