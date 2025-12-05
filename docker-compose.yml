@@ -92,7 +92,7 @@ services:
     image: node:20-alpine
     working_dir: /app
     volumes:
-      - ./mock-api:/app
+      - ./docker/mock-api:/app:ro
     command: node server.js
     ports:
       - "3000:3000"

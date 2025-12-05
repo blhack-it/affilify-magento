@@ -14,10 +14,10 @@ This guide explains how to set up and test the Affilify Tracking module in a loc
 
 ```bash
 # Make scripts executable
-chmod +x bin/*
+chmod +x scripts/*
 
 # Run the setup script (first time only)
-./bin/setup
+./scripts/setup
 ```
 
 This will:
@@ -48,13 +48,13 @@ This will:
    - **URL Parameter Name**: `affilify_id`
    - **Cookie Duration**: 30 days
 3. Save configuration
-4. Flush cache: `./bin/cli cache:flush`
+4. Flush cache: `./scripts/cli cache:flush`
 
 ### Step 2: Create Test Data
 
 ```bash
 # Enter the PHP container
-./bin/bash
+./scripts/bash
 
 # Create a test product
 php create_test_product.php
@@ -74,7 +74,7 @@ The module uses Magento's message queue for async processing. Start the consumer
 # In one terminal - Click consumer
 docker-compose exec php bin/magento queue:consumers:start affilify.tracking.click.consumer &
 
-# In another terminal - Conversion consumer  
+# In another terminal - Conversion consumer
 docker-compose exec php bin/magento queue:consumers:start affilify.tracking.conversion.consumer &
 ```
 
@@ -127,73 +127,56 @@ You should see entries like:
 [2024-01-15 10:30:00] affilify_tracking.INFO: Conversion tracked successfully {"affilify_id":"TEST123","order_id":"100000001","checkout_total":"49.99"} []
 ```
 
-## Mock API Server (Optional)
+## Mock API Server
 
-To test without a real Affilify backend, you can create a simple mock server:
+The mock API server is included in the Docker setup for testing. It runs as a separate container and provides test endpoints for click and conversion tracking.
 
-### Using Node.js
+### Starting the Mock API
 
-Create `mock-api/server.js`:
+The mock API is automatically started with `docker-compose up`. It runs on port 3000 with HTTPS.
 
-```javascript
-const http = require('http');
+### Configuration
 
-const server = http.createServer((req, res) => {
-  let body = '';
-  
-  req.on('data', chunk => {
-    body += chunk.toString();
-  });
-  
-  req.on('end', () => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-    console.log('Body:', body);
-    console.log('---');
-    
-    res.writeHead(200, { 
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    });
-    
-    if (req.method === 'OPTIONS') {
-      res.end();
-      return;
-    }
-    
-    res.end(JSON.stringify({ success: true }));
-  });
-});
+Configure Magento to use the mock API:
+- **Tracking Domain**: `host.docker.internal:3000`
 
-server.listen(3000, () => {
-  console.log('Mock API server running on http://localhost:3000');
-  console.log('Endpoints:');
-  console.log('  POST /m/click  - Click tracking');
-  console.log('  POST /m/conv   - Conversion tracking');
-});
-```
+### Mock API Endpoints
 
-Run it:
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/m/click` | POST | Click tracking |
+| `/m/conv` | POST | Conversion tracking |
+| `/events` | GET | View captured events |
+| `/events` | DELETE | Clear captured events |
+| `/health` | GET | Health check |
+
+### Viewing Events
+
 ```bash
-node mock-api/server.js
+# Check captured clicks and conversions
+curl -k https://localhost:3000/events
+
+# Clear events
+curl -k -X DELETE https://localhost:3000/events
 ```
 
-Then configure the module with Tracking Domain: `host.docker.internal:3000`
+### Mock API Source
+
+The mock API source code is located at `docker/mock-api/server.js`.
 
 ## Debugging
 
 ### Check if Module is Enabled
 
 ```bash
-./bin/cli module:status Affilify_Tracking
+./scripts/cli module:status Affilify_Tracking
 ```
 
 ### Check Queue Status
 
 ```bash
 # List all consumers
-./bin/cli queue:consumers:list
+./scripts/cli queue:consumers:list
 
 # Check queue messages (MySQL)
 docker-compose exec db mysql -u magento -pmagento magento -e "SELECT * FROM queue_message ORDER BY id DESC LIMIT 10;"
@@ -215,15 +198,15 @@ docker-compose exec php tail -f var/log/exception.log
 ### Clear Cache
 
 ```bash
-./bin/cli cache:flush
-./bin/cli cache:clean
+./scripts/cli cache:flush
+./scripts/cli cache:clean
 ```
 
 ### Recompile DI
 
 After modifying PHP files:
 ```bash
-./bin/cli setup:di:compile
+./scripts/cli setup:di:compile
 ```
 
 ## Troubleshooting
@@ -269,16 +252,16 @@ The module requires a tracking domain to send API requests. Configure it in:
 
 ```bash
 # Start environment
-./bin/start
+./scripts/start
 
 # Stop environment
-./bin/stop
+./scripts/stop
 
 # Enter PHP container
-./bin/bash
+./scripts/bash
 
 # Run Magento CLI
-./bin/cli <command>
+./scripts/cli <command>
 
 # View logs
 docker-compose logs -f php

@@ -14,6 +14,9 @@
 /src/*
 !/src/.gitkeep
 
+# Docker Compose override (local customizations)
+docker-compose.override.yml
+
 # Composer auth (contains credentials)
 /auth.json
 
@@ -21,3 +24,4 @@
 Thumbs.db
 *.swp
 *.swo
+
