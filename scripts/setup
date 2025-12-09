@@ -64,14 +64,6 @@ for i in {1..30}; do
     sleep 2
 done
 
-# Verifica che Elasticsearch sia pronto
-echo "🔍 Verifico OpenSearch..."
-until curl -s http://localhost:9200/_cluster/health > /dev/null 2>&1; do
-    echo "   Attendo OpenSearch..."
-    sleep 5
-done
-echo -e "${GREEN}✅ OpenSearch pronto${NC}"
-
 # Scarica Magento se src è vuota
 if [ ! -f "src/composer.json" ]; then
     echo ""
@@ -120,9 +112,6 @@ if [ ! -f "src/app/etc/env.php" ]; then
         --currency=EUR \
         --timezone=Europe/Rome \
         --use-rewrites=1 \
-        --search-engine=opensearch \
-        --opensearch-host=opensearch \
-        --opensearch-port=9200 \
         --amqp-host=rabbitmq \
         --amqp-port=5672 \
         --amqp-user=magento \
@@ -165,7 +154,7 @@ echo -e "${GREEN}✅ Sample Data installato${NC}"
 echo ""
 echo "⚙️  Configurazione modulo Affilify Tracking..."
 docker-compose exec -T php bin/magento config:set affilify_tracking/general/enabled 1
-docker-compose exec -T php bin/magento config:set affilify_tracking/general/tracking_domain "mock-api:3000"
+docker-compose exec -T php bin/magento config:set affilify_tracking/general/tracking_domain "t.affilify.it"
 docker-compose exec -T php bin/magento cache:flush
 echo -e "${GREEN}✅ Modulo Affilify configurato${NC}"
 
@@ -193,7 +182,6 @@ echo "   Password:     Admin123!"
 echo ""
 echo "📧 Mailhog:      http://localhost:8025"
 echo "🐰 RabbitMQ:     http://localhost:15672 (magento/magento)"
-echo "🔍 OpenSearch:   http://localhost:9200"
 echo ""
 echo "📝 Log Affilify: docker-compose exec php tail -f var/log/affilify_tracking.log"
 echo ""
