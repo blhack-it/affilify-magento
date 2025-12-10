@@ -14,8 +14,8 @@ A Magento 2 module for affiliate conversion tracking that integrates with the Af
 
 ## Requirements
 
-- Magento 2.4.7 or higher
-- PHP 8.1 or higher
+- Magento 2.4.0 or higher
+- PHP 7.4 or higher
 
 ## Installation
 
@@ -81,15 +81,21 @@ The module uses MySQL message queues for async processing:
 
 ### Running Queue Consumers
 
+Magento's cron automatically processes queue consumers. Make sure cron is running:
+
 ```bash
-# Run click consumer
+# Verify cron is configured
+bin/magento cron:run
+```
+
+For manual testing or dedicated consumer processes:
+
+```bash
+# Run click consumer manually
 bin/magento queue:consumers:start affilify.tracking.click
 
-# Run conversion consumer  
+# Run conversion consumer manually
 bin/magento queue:consumers:start affilify.tracking.conversion
-
-# Run all consumers (production)
-bin/magento cron:run
 ```
 
 ## Logs
