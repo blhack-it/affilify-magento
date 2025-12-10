@@ -2,26 +2,9 @@
 /.idea/
 /.vscode/
 *.DS_Store
-/var/
-/generated/
-/pub/static/
-/.magento.env.yaml
-/app/etc/env.php
-/app/etc/config.php
 *.log
-
-# Docker - Magento source files (downloaded during setup)
-/src/*
-!/src/.gitkeep
-
-# Docker Compose override (local customizations)
-docker-compose.override.yml
-
-# Composer auth (contains credentials)
-/auth.json
 
 # OS
 Thumbs.db
 *.swp
 *.swo
-

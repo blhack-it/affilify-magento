@@ -1,6 +1,0 @@
-#!/bin/bash
-
-echo "🛑 Arresto ambiente Magento..."
-docker-compose down
-
-echo "✅ Ambiente arrestato!"

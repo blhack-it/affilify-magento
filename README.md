@@ -31,7 +31,7 @@ bin/magento cache:clean
 ### Manual Installation
 
 1. Create directory: `app/code/Affilify/Tracking`
-2. Copy module files to the directory
+2. Download and extract the module files to the directory
 3. Run:
 ```bash
 bin/magento module:enable Affilify_Tracking
@@ -48,7 +48,8 @@ Navigate to **Stores > Configuration > Affilify > Conversion Tracking**
 | Setting | Description | Default |
 |---------|-------------|---------|
 | Enable Tracking | Enable/disable the module | Yes |
-| Tracking Domain | Your custom tracking domain (e.g., t.yourdomain.com) | - |
+| API Key | Your Affilify API Key (from Advertiser > API tab) | - |
+| API URL | Tracking API URL | https://dashboard.affilify.it/api/track |
 | URL Parameter Name | The URL parameter to capture | affilify_id |
 | Cookie Duration | Days to keep the tracking cookie | 30 |
 | Debug Mode | Enable verbose logging | No |
@@ -61,17 +62,15 @@ Navigate to **Stores > Configuration > Affilify > Conversion Tracking**
 2. The module captures the `affilify_id` parameter
 3. The value is validated (alphanumeric, dash, underscore only, max 100 chars)
 4. A cookie is set with the affiliate ID
-5. Click data is queued for async processing
-6. The queue consumer sends the click to your tracking API
+5. Click data is sent to the Affilify API
 
 ### Conversion Tracking
 
 1. Customer completes checkout
 2. The `checkout_onepage_controller_success_action` event fires
 3. If a tracking cookie exists, conversion data is captured
-4. Conversion is queued for async processing
-5. The queue consumer sends the conversion to your tracking API
-6. The tracking cookie is deleted (single conversion per click)
+4. Conversion is sent to the Affilify API with order details
+5. The tracking cookie is deleted (single conversion per click)
 
 ## Message Queue
 
@@ -86,95 +85,22 @@ The module uses MySQL message queues for async processing:
 # Run click consumer
 bin/magento queue:consumers:start affilify.tracking.click
 
-# Run conversion consumer
+# Run conversion consumer  
 bin/magento queue:consumers:start affilify.tracking.conversion
 
 # Run all consumers (production)
 bin/magento cron:run
 ```
 
-## API Endpoints
+## Logs
 
-The module sends data to your Affilify API:
-
-### Click Endpoint: `POST /api/track/click`
-
-```json
-{
-  "affilify_id": "abc123",
-  "referer": "https://google.com",
-  "ip": "192.168.x.x",
-  "user_agent": "Mozilla/5.0...",
-  "timestamp": "2024-01-15T10:30:00+00:00",
-  "platform": "magento"
-}
-```
-
-### Conversion Endpoint: `POST /api/track/conversion`
-
-```json
-{
-  "affilify_id": "abc123",
-  "order_id": "000000123",
-  "amount": "199.99",
-  "currency": "USD",
-  "platform": "magento"
-}
-```
-
-## Logging
-
-Logs are written to: `var/log/affilify_tracking.log`
-
-Enable Debug Mode in configuration for verbose logging.
-
-## Testing
-
-### Unit Tests
-
-```bash
-vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist app/code/Affilify/Tracking/Test/Unit
-```
-
-### Manual Testing
-
-1. Visit your store with an affiliate parameter: `?affilify_id=test123`
-2. Check that the `affilify_tracking` cookie is set
-3. Complete a checkout
-4. Check the logs and/or your tracking API
-
-## Security
-
-- **Input Validation**: Affiliate IDs are validated with strict regex pattern
-- **IP Masking**: IP addresses are masked (192.168.x.x format) for GDPR compliance
-- **XSS Prevention**: All output is properly escaped
-- **SQL Injection Prevention**: Uses Magento's parameter binding
-
-## Troubleshooting
-
-### Cookie Not Being Set
-
-1. Check that the module is enabled in configuration
-2. Verify the URL parameter name matches your link
-3. Check `var/log/affilify_tracking.log` for errors
-
-### Conversion Not Tracking
-
-1. Verify the tracking cookie exists before checkout
-2. Check that the tracking domain is configured
-3. Enable debug mode and check logs
-4. Run queue consumers: `bin/magento queue:consumers:start affilify.tracking.conversion`
-
-### API Calls Failing
-
-1. Verify your tracking domain is accessible
-2. Check for network/firewall issues
-3. The module retries failed calls up to 3 times with exponential backoff
-
-## License
-
-MIT License
+Debug logs are written to: `var/log/affilify_tracking.log`
 
 ## Support
 
-For support, please contact support@affilify.it
+- Issues: https://github.com/blhack-it/affilify-magento/issues
+- Documentation: https://affilify.it/docs
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.

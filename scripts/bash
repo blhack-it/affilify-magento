@@ -1,4 +1,0 @@
-#!/bin/bash
-
-# Apre una shell bash nel container PHP
-docker-compose exec php bash

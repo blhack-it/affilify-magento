@@ -133,7 +133,12 @@ class TrackConversionObserver implements ObserverInterface
         $this->logger->debug('TrackConversionObserver: conversion message published to queue');
 
         // Delete the tracking cookie after successful conversion
-        $this->cookieHelper->deleteTrackingCookie();
-        $this->logger->debug('TrackConversionObserver: tracking cookie deleted');
+        // Wrapped in try-catch because cookie deletion fails in CLI/testing environments
+        try {
+            $this->cookieHelper->deleteTrackingCookie();
+            $this->logger->debug('TrackConversionObserver: tracking cookie deleted');
+        } catch (\Exception $e) {
+            $this->logger->debug('TrackConversionObserver: could not delete cookie (expected in CLI): ' . $e->getMessage());
+        }
     }
 }
