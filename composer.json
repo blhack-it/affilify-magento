@@ -3,7 +3,7 @@
     "description": "Magento 2 module for affiliate conversion tracking via Affilify API",
     "type": "magento2-module",
     "license": "MIT",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "require": {
         "php": ">=7.4",
         "magento/framework": ">=102.0",
