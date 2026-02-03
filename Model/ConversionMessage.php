@@ -35,21 +35,6 @@ class ConversionMessage implements ConversionMessageInterface
     private string $currency = '';
 
     /**
-     * @var string
-     */
-    private string $referer = '';
-
-    /**
-     * @var string
-     */
-    private string $timestamp = '';
-
-    /**
-     * @var string
-     */
-    private string $trackingDomain = '';
-
-    /**
      * @inheritDoc
      */
     public function getAffilifyId(): string
@@ -114,57 +99,6 @@ class ConversionMessage implements ConversionMessageInterface
     public function setCurrency(string $currency): ConversionMessageInterface
     {
         $this->currency = $currency;
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getReferer(): string
-    {
-        return $this->referer;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setReferer(string $referer): ConversionMessageInterface
-    {
-        $this->referer = $referer;
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getTimestamp(): string
-    {
-        return $this->timestamp;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setTimestamp(string $timestamp): ConversionMessageInterface
-    {
-        $this->timestamp = $timestamp;
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getTrackingDomain(): string
-    {
-        return $this->trackingDomain;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setTrackingDomain(string $trackingDomain): ConversionMessageInterface
-    {
-        $this->trackingDomain = $trackingDomain;
         return $this;
     }
 }
