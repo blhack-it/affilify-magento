@@ -18,7 +18,6 @@ use Affilify\Tracking\Logger\Logger;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
-use Magento\Framework\HTTP\Header;
 use Magento\Framework\MessageQueue\PublisherInterface;
 
 class TrackConversionObserver implements ObserverInterface
@@ -49,11 +48,6 @@ class TrackConversionObserver implements ObserverInterface
     private ConversionMessageInterfaceFactory $conversionMessageFactory;
 
     /**
-     * @var Header
-     */
-    private Header $httpHeader;
-
-    /**
      * @var Logger
      */
     private Logger $logger;
@@ -66,7 +60,6 @@ class TrackConversionObserver implements ObserverInterface
      * @param CheckoutSession $checkoutSession
      * @param PublisherInterface $publisher
      * @param ConversionMessageInterfaceFactory $conversionMessageFactory
-     * @param Header $httpHeader
      * @param Logger $logger
      */
     public function __construct(
@@ -75,7 +68,6 @@ class TrackConversionObserver implements ObserverInterface
         CheckoutSession $checkoutSession,
         PublisherInterface $publisher,
         ConversionMessageInterfaceFactory $conversionMessageFactory,
-        Header $httpHeader,
         Logger $logger
     ) {
         $this->config = $config;
@@ -83,7 +75,6 @@ class TrackConversionObserver implements ObserverInterface
         $this->checkoutSession = $checkoutSession;
         $this->publisher = $publisher;
         $this->conversionMessageFactory = $conversionMessageFactory;
-        $this->httpHeader = $httpHeader;
         $this->logger = $logger;
     }
 
@@ -104,10 +95,10 @@ class TrackConversionObserver implements ObserverInterface
         }
 
         // Check if we have a tracking cookie
-        $affilfyId = $this->cookieHelper->getTrackingCookie();
-        $this->logger->debug('TrackConversionObserver: cookie present = ' . ($affilfyId ? 'yes' : 'no'));
+        $affilifyId = $this->cookieHelper->getTrackingCookie();
+        $this->logger->debug('TrackConversionObserver: cookie present = ' . ($affilifyId ? 'yes' : 'no'));
 
-        if (empty($affilfyId)) {
+        if (empty($affilifyId)) {
             $this->logger->debug('TrackConversionObserver: no tracking cookie, skipping');
             return;
         }
@@ -124,7 +115,7 @@ class TrackConversionObserver implements ObserverInterface
         // Publish conversion message to queue
         /** @var ConversionMessageInterface $conversionMessage */
         $conversionMessage = $this->conversionMessageFactory->create();
-        $conversionMessage->setAffilfyId($affilfyId)
+        $conversionMessage->setAffilifyId($affilifyId)
             ->setOrderId($order->getIncrementId())
             ->setCheckoutTotal((string) $order->getGrandTotal())
             ->setCurrency($order->getOrderCurrencyCode() ?: 'EUR');

@@ -147,7 +147,7 @@ class CaptureClickPlugin
 
             // Publish to queue for async processing
             $clickMessage = $this->clickMessageFactory->create();
-            $clickMessage->setAffilfyId($affiliateId)
+            $clickMessage->setAffilifyId($affiliateId)
                 ->setIp($this->maskIp((string)($this->request->getClientIp() ?: '')))
                 ->setUserAgent((string)($this->request->getHeader('User-Agent') ?: ''))
                 ->setReferer((string)($this->request->getHeader('Referer') ?: ''))

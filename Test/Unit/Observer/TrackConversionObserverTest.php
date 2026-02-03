@@ -18,7 +18,6 @@ use Affilify\Tracking\Logger\Logger;
 use Affilify\Tracking\Observer\TrackConversionObserver;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Event\Observer;
-use Magento\Framework\HTTP\Header;
 use Magento\Framework\MessageQueue\PublisherInterface;
 use Magento\Sales\Model\Order;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -57,11 +56,6 @@ class TrackConversionObserverTest extends TestCase
     private $conversionMessageFactoryMock;
 
     /**
-     * @var Header|MockObject
-     */
-    private $httpHeaderMock;
-
-    /**
      * @var Logger|MockObject
      */
     private $loggerMock;
@@ -78,7 +72,6 @@ class TrackConversionObserverTest extends TestCase
         $this->checkoutSessionMock = $this->createMock(CheckoutSession::class);
         $this->publisherMock = $this->createMock(PublisherInterface::class);
         $this->conversionMessageFactoryMock = $this->createMock(ConversionMessageInterfaceFactory::class);
-        $this->httpHeaderMock = $this->createMock(Header::class);
         $this->loggerMock = $this->createMock(Logger::class);
         $this->observerMock = $this->createMock(Observer::class);
 
@@ -88,7 +81,6 @@ class TrackConversionObserverTest extends TestCase
             $this->checkoutSessionMock,
             $this->publisherMock,
             $this->conversionMessageFactoryMock,
-            $this->httpHeaderMock,
             $this->loggerMock
         );
     }
@@ -135,31 +127,11 @@ class TrackConversionObserverTest extends TestCase
     }
 
     /**
-     * Test execute does nothing when no tracking domain
-     */
-    public function testExecuteDoesNothingWhenNoTrackingDomain(): void
-    {
-        $this->configMock->method('isEnabled')->willReturn(true);
-        $this->configMock->method('getTrackingDomain')->willReturn('');
-        $this->cookieHelperMock->method('getTrackingCookie')->willReturn('test-123');
-
-        $this->loggerMock->expects($this->once())
-            ->method('warning')
-            ->with('TrackConversionObserver: no tracking domain configured');
-
-        $this->publisherMock->expects($this->never())
-            ->method('publish');
-
-        $this->observer->execute($this->observerMock);
-    }
-
-    /**
      * Test execute does nothing when no order
      */
     public function testExecuteDoesNothingWhenNoOrder(): void
     {
         $this->configMock->method('isEnabled')->willReturn(true);
-        $this->configMock->method('getTrackingDomain')->willReturn('t.example.com');
         $this->cookieHelperMock->method('getTrackingCookie')->willReturn('test-123');
         $this->checkoutSessionMock->method('getLastRealOrder')->willReturn(null);
 
@@ -178,12 +150,9 @@ class TrackConversionObserverTest extends TestCase
         $orderId = '000000001';
         $grandTotal = 199.99;
         $currency = 'USD';
-        $trackingDomain = 't.example.com';
 
         $this->configMock->method('isEnabled')->willReturn(true);
-        $this->configMock->method('getTrackingDomain')->willReturn($trackingDomain);
         $this->cookieHelperMock->method('getTrackingCookie')->willReturn($affiliateId);
-        $this->httpHeaderMock->method('getHttpReferer')->willReturn('https://example.com');
 
         // Order mock
         $orderMock = $this->createMock(Order::class);
@@ -196,13 +165,10 @@ class TrackConversionObserverTest extends TestCase
 
         // Conversion message mock
         $conversionMessageMock = $this->createMock(ConversionMessageInterface::class);
-        $conversionMessageMock->method('setAffilfyId')->willReturnSelf();
+        $conversionMessageMock->method('setAffilifyId')->willReturnSelf();
         $conversionMessageMock->method('setOrderId')->willReturnSelf();
         $conversionMessageMock->method('setCheckoutTotal')->willReturnSelf();
         $conversionMessageMock->method('setCurrency')->willReturnSelf();
-        $conversionMessageMock->method('setReferer')->willReturnSelf();
-        $conversionMessageMock->method('setTimestamp')->willReturnSelf();
-        $conversionMessageMock->method('setTrackingDomain')->willReturnSelf();
 
         $this->conversionMessageFactoryMock->method('create')
             ->willReturn($conversionMessageMock);
@@ -231,13 +197,9 @@ class TrackConversionObserverTest extends TestCase
         $orderId = '000000001';
         $grandTotal = 199.99;
         $currency = 'EUR';
-        $trackingDomain = 't.example.com';
-        $referer = 'https://example.com/checkout/success';
 
         $this->configMock->method('isEnabled')->willReturn(true);
-        $this->configMock->method('getTrackingDomain')->willReturn($trackingDomain);
         $this->cookieHelperMock->method('getTrackingCookie')->willReturn($affiliateId);
-        $this->httpHeaderMock->method('getHttpReferer')->willReturn($referer);
 
         $orderMock = $this->createMock(Order::class);
         $orderMock->method('getId')->willReturn(1);
@@ -251,7 +213,7 @@ class TrackConversionObserverTest extends TestCase
         $conversionMessageMock = $this->createMock(ConversionMessageInterface::class);
 
         $conversionMessageMock->expects($this->once())
-            ->method('setAffilfyId')
+            ->method('setAffilifyId')
             ->with($affiliateId)
             ->willReturnSelf();
 
@@ -270,18 +232,6 @@ class TrackConversionObserverTest extends TestCase
             ->with($currency)
             ->willReturnSelf();
 
-        $conversionMessageMock->expects($this->once())
-            ->method('setReferer')
-            ->with($referer)
-            ->willReturnSelf();
-
-        $conversionMessageMock->expects($this->once())
-            ->method('setTrackingDomain')
-            ->with($trackingDomain)
-            ->willReturnSelf();
-
-        $conversionMessageMock->method('setTimestamp')->willReturnSelf();
-
         $this->conversionMessageFactoryMock->method('create')
             ->willReturn($conversionMessageMock);
 
@@ -289,14 +239,12 @@ class TrackConversionObserverTest extends TestCase
     }
 
     /**
-     * Test uses default currency when order currency is null
+     * Test uses default currency (EUR) when order currency is null
      */
     public function testUsesDefaultCurrencyWhenNull(): void
     {
         $this->configMock->method('isEnabled')->willReturn(true);
-        $this->configMock->method('getTrackingDomain')->willReturn('t.example.com');
         $this->cookieHelperMock->method('getTrackingCookie')->willReturn('test-123');
-        $this->httpHeaderMock->method('getHttpReferer')->willReturn('');
 
         $orderMock = $this->createMock(Order::class);
         $orderMock->method('getId')->willReturn(1);
@@ -307,17 +255,14 @@ class TrackConversionObserverTest extends TestCase
         $this->checkoutSessionMock->method('getLastRealOrder')->willReturn($orderMock);
 
         $conversionMessageMock = $this->createMock(ConversionMessageInterface::class);
-        $conversionMessageMock->method('setAffilfyId')->willReturnSelf();
+        $conversionMessageMock->method('setAffilifyId')->willReturnSelf();
         $conversionMessageMock->method('setOrderId')->willReturnSelf();
         $conversionMessageMock->method('setCheckoutTotal')->willReturnSelf();
-        $conversionMessageMock->method('setReferer')->willReturnSelf();
-        $conversionMessageMock->method('setTimestamp')->willReturnSelf();
-        $conversionMessageMock->method('setTrackingDomain')->willReturnSelf();
 
-        // Expect USD as default
+        // Expect EUR as default (for European market)
         $conversionMessageMock->expects($this->once())
             ->method('setCurrency')
-            ->with('USD')
+            ->with('EUR')
             ->willReturnSelf();
 
         $this->conversionMessageFactoryMock->method('create')

@@ -28,12 +28,12 @@ class ClickMessageTest extends TestCase
     /**
      * Test setters and getters for affiliate ID
      */
-    public function testAffilfyId(): void
+    public function testAffilifyId(): void
     {
-        $result = $this->message->setAffilfyId('test-affiliate-123');
+        $result = $this->message->setAffilifyId('test-affiliate-123');
 
         $this->assertSame($this->message, $result, 'Setter should return self for fluent interface');
-        $this->assertEquals('test-affiliate-123', $this->message->getAffilfyId());
+        $this->assertEquals('test-affiliate-123', $this->message->getAffilifyId());
     }
 
     /**
@@ -99,14 +99,14 @@ class ClickMessageTest extends TestCase
     public function testFluentInterface(): void
     {
         $this->message
-            ->setAffilfyId('test-123')
+            ->setAffilifyId('test-123')
             ->setIp('10.0.x.x')
             ->setUserAgent('TestBot/1.0')
             ->setReferer('https://example.com')
             ->setTimestamp('2024-01-15T10:00:00Z')
             ->setTrackingDomain('t.affilify.it');
 
-        $this->assertEquals('test-123', $this->message->getAffilfyId());
+        $this->assertEquals('test-123', $this->message->getAffilifyId());
         $this->assertEquals('10.0.x.x', $this->message->getIp());
         $this->assertEquals('TestBot/1.0', $this->message->getUserAgent());
         $this->assertEquals('https://example.com', $this->message->getReferer());
@@ -121,7 +121,7 @@ class ClickMessageTest extends TestCase
     {
         $newMessage = new ClickMessage();
 
-        $this->assertEquals('', $newMessage->getAffilfyId());
+        $this->assertEquals('', $newMessage->getAffilifyId());
         $this->assertEquals('', $newMessage->getIp());
         $this->assertEquals('', $newMessage->getUserAgent());
         $this->assertEquals('', $newMessage->getReferer());

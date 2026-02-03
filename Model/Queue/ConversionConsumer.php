@@ -82,14 +82,14 @@ class ConversionConsumer
         $apiUrl = $this->config->getConversionApiUrl();
 
         $payload = [
-            'affilify_id' => $message->getAffilfyId(),
+            'affilify_id' => $message->getAffilifyId(),
             'order_id' => $message->getOrderId(),
             'amount' => $message->getCheckoutTotal(),
             'currency' => $message->getCurrency(),
             'platform' => 'magento'
         ];
 
-        $this->executeWithRetry($apiUrl, $payload, $apiKey, $message->getAffilfyId(), $message->getOrderId());
+        $this->executeWithRetry($apiUrl, $payload, $apiKey, $message->getAffilifyId(), $message->getOrderId());
     }
 
     /**

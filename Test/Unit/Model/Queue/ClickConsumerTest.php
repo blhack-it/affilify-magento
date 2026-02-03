@@ -234,7 +234,7 @@ class ClickConsumerTest extends TestCase
      */
     private function setupMessageMock(): void
     {
-        $this->messageMock->method('getAffilfyId')->willReturn('test-affiliate-123');
+        $this->messageMock->method('getAffilifyId')->willReturn('test-affiliate-123');
         $this->messageMock->method('getReferer')->willReturn('https://google.com');
         $this->messageMock->method('getIp')->willReturn('192.168.x.x');
         $this->messageMock->method('getUserAgent')->willReturn('Mozilla/5.0');

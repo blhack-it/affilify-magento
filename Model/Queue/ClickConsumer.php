@@ -82,7 +82,7 @@ class ClickConsumer
         $apiUrl = $this->config->getClickApiUrl();
 
         $payload = [
-            'affilify_id' => $message->getAffilfyId(),
+            'affilify_id' => $message->getAffilifyId(),
             'referer' => $message->getReferer(),
             'ip' => $message->getIp(),
             'user_agent' => $message->getUserAgent(),
@@ -90,7 +90,7 @@ class ClickConsumer
             'platform' => 'magento'
         ];
 
-        $this->executeWithRetry($apiUrl, $payload, $message->getAffilfyId(), $apiKey);
+        $this->executeWithRetry($apiUrl, $payload, $message->getAffilifyId(), $apiKey);
     }
 
     /**

@@ -17,15 +17,15 @@ interface ClickMessageInterface
      *
      * @return string
      */
-    public function getAffilfyId(): string;
+    public function getAffilifyId(): string;
 
     /**
      * Set affilify ID
      *
-     * @param string $affilfyId
+     * @param string $affilifyId
      * @return self
      */
-    public function setAffilfyId(string $affilfyId): self;
+    public function setAffilifyId(string $affilifyId): self;
 
     /**
      * Get referer URL

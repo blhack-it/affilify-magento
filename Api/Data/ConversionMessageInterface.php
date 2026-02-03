@@ -17,15 +17,15 @@ interface ConversionMessageInterface
      *
      * @return string
      */
-    public function getAffilfyId(): string;
+    public function getAffilifyId(): string;
 
     /**
      * Set affilify ID
      *
-     * @param string $affilfyId
+     * @param string $affilifyId
      * @return self
      */
-    public function setAffilfyId(string $affilfyId): self;
+    public function setAffilifyId(string $affilifyId): self;
 
     /**
      * Get order ID
@@ -71,4 +71,49 @@ interface ConversionMessageInterface
      * @return self
      */
     public function setCurrency(string $currency): self;
+
+    /**
+     * Get referer URL
+     *
+     * @return string
+     */
+    public function getReferer(): string;
+
+    /**
+     * Set referer URL
+     *
+     * @param string $referer
+     * @return self
+     */
+    public function setReferer(string $referer): self;
+
+    /**
+     * Get timestamp
+     *
+     * @return string
+     */
+    public function getTimestamp(): string;
+
+    /**
+     * Set timestamp
+     *
+     * @param string $timestamp
+     * @return self
+     */
+    public function setTimestamp(string $timestamp): self;
+
+    /**
+     * Get tracking domain
+     *
+     * @return string
+     */
+    public function getTrackingDomain(): string;
+
+    /**
+     * Set tracking domain
+     *
+     * @param string $trackingDomain
+     * @return self
+     */
+    public function setTrackingDomain(string $trackingDomain): self;
 }

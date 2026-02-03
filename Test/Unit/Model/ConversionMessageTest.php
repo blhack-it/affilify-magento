@@ -28,12 +28,12 @@ class ConversionMessageTest extends TestCase
     /**
      * Test setters and getters for affiliate ID
      */
-    public function testAffilfyId(): void
+    public function testAffilifyId(): void
     {
-        $result = $this->message->setAffilfyId('test-affiliate-123');
+        $result = $this->message->setAffilifyId('test-affiliate-123');
 
         $this->assertSame($this->message, $result, 'Setter should return self for fluent interface');
-        $this->assertEquals('test-affiliate-123', $this->message->getAffilfyId());
+        $this->assertEquals('test-affiliate-123', $this->message->getAffilifyId());
     }
 
     /**
@@ -109,7 +109,7 @@ class ConversionMessageTest extends TestCase
     public function testFluentInterface(): void
     {
         $this->message
-            ->setAffilfyId('test-123')
+            ->setAffilifyId('test-123')
             ->setOrderId('ORDER-001')
             ->setCheckoutTotal('100.00')
             ->setCurrency('USD')
@@ -117,7 +117,7 @@ class ConversionMessageTest extends TestCase
             ->setTimestamp('2024-01-15T10:00:00Z')
             ->setTrackingDomain('t.affilify.it');
 
-        $this->assertEquals('test-123', $this->message->getAffilfyId());
+        $this->assertEquals('test-123', $this->message->getAffilifyId());
         $this->assertEquals('ORDER-001', $this->message->getOrderId());
         $this->assertEquals('100.00', $this->message->getCheckoutTotal());
         $this->assertEquals('USD', $this->message->getCurrency());
@@ -133,7 +133,7 @@ class ConversionMessageTest extends TestCase
     {
         $newMessage = new ConversionMessage();
 
-        $this->assertEquals('', $newMessage->getAffilfyId());
+        $this->assertEquals('', $newMessage->getAffilifyId());
         $this->assertEquals('', $newMessage->getOrderId());
         $this->assertEquals('', $newMessage->getCheckoutTotal());
         $this->assertEquals('', $newMessage->getCurrency());

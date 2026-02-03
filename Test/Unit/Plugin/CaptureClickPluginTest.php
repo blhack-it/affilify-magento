@@ -241,7 +241,7 @@ class CaptureClickPluginTest extends TestCase
 
         // Click message setup
         $clickMessageMock = $this->createMock(ClickMessageInterface::class);
-        $clickMessageMock->method('setAffilfyId')->willReturnSelf();
+        $clickMessageMock->method('setAffilifyId')->willReturnSelf();
         $clickMessageMock->method('setIp')->willReturnSelf();
         $clickMessageMock->method('setUserAgent')->willReturnSelf();
         $clickMessageMock->method('setReferer')->willReturnSelf();
@@ -290,7 +290,7 @@ class CaptureClickPluginTest extends TestCase
 
         // Click message setup
         $clickMessageMock = $this->createMock(ClickMessageInterface::class);
-        $clickMessageMock->method('setAffilfyId')->willReturnSelf();
+        $clickMessageMock->method('setAffilifyId')->willReturnSelf();
         $clickMessageMock->method('setIp')->willReturnSelf();
         $clickMessageMock->method('setUserAgent')->willReturnSelf();
         $clickMessageMock->method('setReferer')->willReturnSelf();

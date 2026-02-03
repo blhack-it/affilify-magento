@@ -17,7 +17,7 @@ class ClickMessage implements ClickMessageInterface
     /**
      * @var string
      */
-    private string $affilfyId = '';
+    private string $affilifyId = '';
 
     /**
      * @var string
@@ -47,17 +47,17 @@ class ClickMessage implements ClickMessageInterface
     /**
      * @inheritDoc
      */
-    public function getAffilfyId(): string
+    public function getAffilifyId(): string
     {
-        return $this->affilfyId;
+        return $this->affilifyId;
     }
 
     /**
      * @inheritDoc
      */
-    public function setAffilfyId(string $affilfyId): ClickMessageInterface
+    public function setAffilifyId(string $affilifyId): ClickMessageInterface
     {
-        $this->affilfyId = $affilfyId;
+        $this->affilifyId = $affilifyId;
         return $this;
     }
 

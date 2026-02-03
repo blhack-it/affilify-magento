@@ -234,7 +234,7 @@ class ConversionConsumerTest extends TestCase
      */
     private function setupMessageMock(): void
     {
-        $this->messageMock->method('getAffilfyId')->willReturn('test-affiliate-123');
+        $this->messageMock->method('getAffilifyId')->willReturn('test-affiliate-123');
         $this->messageMock->method('getOrderId')->willReturn('000000001');
         $this->messageMock->method('getCheckoutTotal')->willReturn('199.99');
         $this->messageMock->method('getCurrency')->willReturn('USD');
