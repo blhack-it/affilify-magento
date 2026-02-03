@@ -204,12 +204,10 @@ class CaptureClickPluginTest extends TestCase
     public function testBeforeSendResponseSetsCoookieAndPublishesMessage(): void
     {
         $affiliateId = 'valid-affiliate-123';
-        $trackingDomain = 't.example.com';
         $cookieDuration = 2592000;
 
         $this->configMock->method('isEnabled')->willReturn(true);
         $this->configMock->method('getParameterName')->willReturn('affilify_id');
-        $this->configMock->method('getTrackingDomain')->willReturn($trackingDomain);
         $this->configMock->method('getCookieDurationSeconds')->willReturn($cookieDuration);
 
         $this->requestMock->method('getParam')->with('affilify_id')->willReturn($affiliateId);
@@ -271,7 +269,6 @@ class CaptureClickPluginTest extends TestCase
     {
         $this->configMock->method('isEnabled')->willReturn(true);
         $this->configMock->method('getParameterName')->willReturn('affilify_id');
-        $this->configMock->method('getTrackingDomain')->willReturn('t.example.com');
         $this->configMock->method('getCookieDurationSeconds')->willReturn(2592000);
 
         $this->requestMock->method('getParam')->with('affilify_id')->willReturn($validId);
@@ -336,7 +333,6 @@ class CaptureClickPluginTest extends TestCase
     {
         $this->configMock->method('isEnabled')->willReturn(true);
         $this->configMock->method('getParameterName')->willReturn('affilify_id');
-        $this->configMock->method('getTrackingDomain')->willReturn('t.example.com');
         $this->configMock->method('getCookieDurationSeconds')->willReturn(2592000);
 
         $this->requestMock->method('getParam')->willReturn('valid-id');

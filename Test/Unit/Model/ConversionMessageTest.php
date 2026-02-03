@@ -70,40 +70,6 @@ class ConversionMessageTest extends TestCase
     }
 
     /**
-     * Test setters and getters for referer
-     */
-    public function testReferer(): void
-    {
-        $result = $this->message->setReferer('https://example.com/page');
-
-        $this->assertSame($this->message, $result);
-        $this->assertEquals('https://example.com/page', $this->message->getReferer());
-    }
-
-    /**
-     * Test setters and getters for timestamp
-     */
-    public function testTimestamp(): void
-    {
-        $timestamp = '2024-01-15T10:30:00+00:00';
-        $result = $this->message->setTimestamp($timestamp);
-
-        $this->assertSame($this->message, $result);
-        $this->assertEquals($timestamp, $this->message->getTimestamp());
-    }
-
-    /**
-     * Test setters and getters for tracking domain
-     */
-    public function testTrackingDomain(): void
-    {
-        $result = $this->message->setTrackingDomain('t.example.com');
-
-        $this->assertSame($this->message, $result);
-        $this->assertEquals('t.example.com', $this->message->getTrackingDomain());
-    }
-
-    /**
      * Test fluent interface chaining
      */
     public function testFluentInterface(): void
@@ -112,18 +78,12 @@ class ConversionMessageTest extends TestCase
             ->setAffilifyId('test-123')
             ->setOrderId('ORDER-001')
             ->setCheckoutTotal('100.00')
-            ->setCurrency('USD')
-            ->setReferer('https://google.com')
-            ->setTimestamp('2024-01-15T10:00:00Z')
-            ->setTrackingDomain('t.affilify.it');
+            ->setCurrency('USD');
 
         $this->assertEquals('test-123', $this->message->getAffilifyId());
         $this->assertEquals('ORDER-001', $this->message->getOrderId());
         $this->assertEquals('100.00', $this->message->getCheckoutTotal());
         $this->assertEquals('USD', $this->message->getCurrency());
-        $this->assertEquals('https://google.com', $this->message->getReferer());
-        $this->assertEquals('2024-01-15T10:00:00Z', $this->message->getTimestamp());
-        $this->assertEquals('t.affilify.it', $this->message->getTrackingDomain());
     }
 
     /**
@@ -137,8 +97,5 @@ class ConversionMessageTest extends TestCase
         $this->assertEquals('', $newMessage->getOrderId());
         $this->assertEquals('', $newMessage->getCheckoutTotal());
         $this->assertEquals('', $newMessage->getCurrency());
-        $this->assertEquals('', $newMessage->getReferer());
-        $this->assertEquals('', $newMessage->getTimestamp());
-        $this->assertEquals('', $newMessage->getTrackingDomain());
     }
 }
